@@ -1,0 +1,72 @@
+body {
+  height: 100vh;
+  background: linear-gradient(135deg, #882423, #c85050);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Card container */
+.container {
+  background: #ffffff;
+  padding: 35px 30px;
+  width: 340px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+/* Title */
+.container h1 {
+  margin-bottom: 20px;
+  color: #bb3028;
+}
+
+/* Form layout */
+form {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+/* Labels */
+label {
+  font-size: 14px;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+/* Inputs */
+input {
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+/* Input focus effect */
+input:focus {
+  border-color: #c23131;
+  box-shadow: 0 0 5px rgba(119, 14, 6, 0.3);
+  outline: none;
+}
+
+/* Button */
+button {
+  background: #d02a2a;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+/* Button hover */
+button:hover {
+  background: #b32f2d;
+  transform: scale(1.02);
+}
