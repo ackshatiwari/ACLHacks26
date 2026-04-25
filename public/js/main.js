@@ -12,6 +12,7 @@ if (document.getElementById('createAccountForm')) {
         const password = document.getElementById('password').value;
         const first_name = document.getElementById('first_name').value;
         const last_name = document.getElementById('last_name').value;
+        const email = document.getElementById('email').value;
         const phone_number = document.getElementById('phone_number').value;
         const country = document.getElementById('country').value;
         const age = document.getElementById('age').value;
@@ -25,7 +26,7 @@ if (document.getElementById('createAccountForm')) {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ username, password, first_name, last_name, phone_number, country, age, height, gender, bloodType })
+                body: JSON.stringify({ username, password, first_name, last_name, phone_number, country, age, height, gender, bloodType, email })
             });
             const responseBody = await response.json().catch(() => ({}));
 
@@ -246,38 +247,90 @@ const attachSubmitFindMatch = (formId, organType) => {
                         resultsEl.innerHTML = '<p>No matches found.</p>';
                     } else {
                         resultsEl.innerHTML = `
+                            <style>
+                                .matches-grid {
+                                    display: grid;
+                                    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                                    gap: 1rem;
+                                    margin-top: 1rem;
+                                }
+
+                                .match-tile {
+                                    border: 1px solid #dbe3ea;
+                                    border-radius: 18px;
+                                    background: linear-gradient(180deg, #ffffff 0%, #f8fbfd 100%);
+                                    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+                                    overflow: hidden;
+                                }
+
+                                .match-name {
+                                    margin: 0;
+                                    padding: 1.1rem 1.1rem 0.9rem;
+                                    font-size: 1.5rem;
+                                    line-height: 1.15;
+                                    font-weight: 800;
+                                    color: #0f172a;
+                                    border-bottom: 1px solid #e5eef5;
+                                    background: linear-gradient(135deg, #effaf7 0%, #ffffff 75%);
+                                }
+
+                                .match-body {
+                                    padding: 1rem 1.1rem 1.1rem;
+                                    display: grid;
+                                    gap: 0.85rem;
+                                }
+
+                                .match-section {
+                                    padding: 0.9rem;
+                                    border-radius: 14px;
+                                    background: #ffffff;
+                                    border: 1px solid #e6edf3;
+                                }
+
+                                .match-section h4 {
+                                    margin: 0 0 0.45rem;
+                                    font-size: 0.88rem;
+                                    text-transform: uppercase;
+                                    letter-spacing: 0.08em;
+                                    color: #0f766e;
+                                }
+
+                                .match-section p {
+                                    margin: 0.2rem 0;
+                                    color: #334155;
+                                    font-size: 0.96rem;
+                                    line-height: 1.45;
+                                }
+
+                                .match-organ-list {
+                                    margin: 0;
+                                    padding-left: 1.1rem;
+                                    color: #334155;
+                                }
+                            </style>
                             <h3>${organType} Matches</h3>
-                            <div style="overflow-x:auto;">
-                                <table style="width:100%; border-collapse: collapse;">
-                                    <thead>
-                                        <tr>
-                                            <th style="border:1px solid #ddd; padding:8px; text-align:left;">First Name</th>
-                                            <th style="border:1px solid #ddd; padding:8px; text-align:left;">Last Name</th>
-                                            <th style="border:1px solid #ddd; padding:8px; text-align:left;">Phone Number</th>
-                                            <th style="border:1px solid #ddd; padding:8px; text-align:left;">Country</th>
-                                            <th style="border:1px solid #ddd; padding:8px; text-align:left;">Age</th>
-                                            <th style="border:1px solid #ddd; padding:8px; text-align:left;">Blood Type</th>
-                                            <th style="border:1px solid #ddd; padding:8px; text-align:left;">Organ Size</th>
-                                            <th style="border:1px solid #ddd; padding:8px; text-align:left;">HLA</th>
-                                            <th style="border:1px solid #ddd; padding:8px; text-align:left;">pTLC</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${matches.map((match) => `
-                                            <tr>
-                                                <td style="border:1px solid #ddd; padding:8px;">${match.first_name ?? ''}</td>
-                                                <td style="border:1px solid #ddd; padding:8px;">${match.last_name ?? ''}</td>
-                                                <td style="border:1px solid #ddd; padding:8px;">${match.phone_number ?? ''}</td>
-                                                <td style="border:1px solid #ddd; padding:8px;">${match.country ?? ''}</td>
-                                                <td style="border:1px solid #ddd; padding:8px;">${match.age ?? ''}</td>
-                                                <td style="border:1px solid #ddd; padding:8px;">${match.blood_type ?? ''}</td>
-                                                <td style="border:1px solid #ddd; padding:8px;">${match.size ?? ''}</td>
-                                                <td style="border:1px solid #ddd; padding:8px;">${match.hla ?? ''}</td>
-                                                <td style="border:1px solid #ddd; padding:8px;">${match.ptlc ?? ''}</td>
-                                            </tr>
-                                        `).join('')}
-                                    </tbody>
-                                </table>
+                            <div class="matches-grid">
+                                ${matches.map((match) => `
+                                    <article class="match-tile">
+                                        <h3 class="match-name">${match.first_name ?? ''} ${match.last_name ?? ''}</h3>
+                                        <div class="match-body">
+                                            <section class="match-section">
+                                                <h4>Contact Info</h4>
+                                                <p><strong>Email:</strong> ${match.email ?? ''}</p>
+                                                <p><strong>Phone:</strong> ${match.phone_number ?? ''}</p>
+                                                <p><strong>Country:</strong> ${match.country ?? ''}</p>
+                                                <p><strong>Age:</strong> ${match.age ?? ''}</p>
+                                            </section>
+                                            <section class="match-section">
+                                                <h4>Organ Details</h4>
+                                                <p><strong>Blood Type:</strong> ${match.blood_type ?? ''}</p>
+                                                <p><strong>Size:</strong> ${match.size ?? ''}</p>
+                                                ${match.hla ? `<p><strong>HLA:</strong> ${match.hla}</p>` : ''}
+                                                ${match.ptlc ? `<p><strong>pTLC:</strong> ${match.ptlc}</p>` : ''}
+                                            </section>
+                                        </div>
+                                    </article>
+                                `).join('')}
                             </div>
                         `;
                     }

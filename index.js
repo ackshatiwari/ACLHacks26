@@ -58,9 +58,9 @@ app.get('/match_with_doner', (req, res) => {
 
 
 app.post('/api/createaccount', async (req, res) => {
-    const { username, password, first_name, last_name, phone_number, country, age, height, gender, bloodtype, bloodType } = req.body;
+    const { username, password, first_name, last_name, phone_number, country, age, height, gender, bloodtype, bloodType, email } = req.body;
     const resolvedBloodType = bloodtype ?? bloodType;
-    const requiredFields = [username, password, first_name, last_name, phone_number, country, age, height, gender, resolvedBloodType];
+    const requiredFields = [username, password, first_name, last_name, phone_number, country, age, height, gender, resolvedBloodType, email];
 
     // Validate that all required fields are present and not just whitespace
     if (requiredFields.some((value) => !String(value || '').trim())) {
@@ -84,13 +84,14 @@ app.post('/api/createaccount', async (req, res) => {
         age: parseInt(age),
         height: parseInt(height),
         gender: gender.trim(),
-        bloodtype: String(resolvedBloodType).trim()
+        bloodtype: String(resolvedBloodType).trim(),
+        email: email.trim()
     };
 
     try {
 
         await sql`
-			INSERT INTO users (first_name, last_name, phone_number, country, password, username, age, height, gender, blood_type)
+			INSERT INTO users (first_name, last_name, phone_number, country, password, username, age, height, gender, blood_type, email)
 			VALUES (
 				${normalized.first_name},
                 ${normalized.last_name},
@@ -101,7 +102,8 @@ app.post('/api/createaccount', async (req, res) => {
 				${normalized.age},
 				${normalized.height},
 				${normalized.gender},
-                ${normalized.bloodtype}
+                ${normalized.bloodtype},
+                ${normalized.email}
 			)
 		`;
 
@@ -246,6 +248,7 @@ const findMatchesHandler = async (req, res) => {
                     l.*,
                     u.first_name,
                     u.last_name,
+                    u.email,
                     u.phone_number,
                     u.country,
                     u.age
@@ -267,6 +270,7 @@ const findMatchesHandler = async (req, res) => {
                     k.*,
                     u.first_name,
                     u.last_name,
+                    u.email,
                     u.phone_number,
                     u.country,
                     u.age
@@ -286,6 +290,7 @@ const findMatchesHandler = async (req, res) => {
                     h.*,
                     u.first_name,
                     u.last_name,
+                    u.email,
                     u.phone_number,
                     u.country,
                     u.age
@@ -307,6 +312,7 @@ const findMatchesHandler = async (req, res) => {
                     l.*,
                     u.first_name,
                     u.last_name,
+                    u.email,
                     u.phone_number,
                     u.country,
                     u.age
