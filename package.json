@@ -1,0 +1,28 @@
+{
+  "name": "acl",
+  "version": "1.0.0",
+  "description": "��#\u0000 \u0000A\u0000C\u0000L\u0000H\u0000a\u0000c\u0000k\u0000s\u00002\u00006\u0000\r\u0000 \u0000",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ackshatiwari/ACLHacks26.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ackshatiwari/ACLHacks26/issues"
+  },
+  "homepage": "https://github.com/ackshatiwari/ACLHacks26#readme"
+}
