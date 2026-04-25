@@ -10,9 +10,10 @@ header {
   background: #c01b1b;
   color: white;
   text-align: center;
-  padding: 30px 10px;
+  border-radius: 20px;
+  padding: 20px 20px;
   margin: 0 auto;
-  margin-top: 100px;
+  margin-top: 50px;
   width: 50%;
 }
 
@@ -22,25 +23,28 @@ header h1 {
 
 form {
   background: white;
+  display: block;
   margin: 20px auto;
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  width: 30%;
+  width: 40%;
 }
 
 form label {
   display: block;
   text-align: center;
-  margin-bottom: 5px;
   font-weight: bold;
 }
 
 form input {
-  width: 90%;
+  width: 95%;
   padding: 8px;
-  margin-bottom: 15px;
-  margin: 0 auto;
+  font-size: 16px;
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  height: 20px;
   border: 1px solid #ccc;
   border-radius: 5px;
 }
@@ -51,7 +55,7 @@ form button {
   border: none;
   display: block;
   width: 50%;
-  margin: 50 auto auto 50;
+  margin: 20px auto;
   padding: 10px 20px;
   border-radius: 5px;
   cursor: pointer;
