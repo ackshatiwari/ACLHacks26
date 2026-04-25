@@ -37,3 +37,25 @@ if (document.getElementById('createAccountForm')) {
         }
     });
 }
+
+if (document.getElementById('login-account-form')) {
+    const loginForm = document.getElementById('login-account-form');
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const response = await fetch('/api/login-to-account', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'            },
+            body: JSON.stringify({ username, password })
+        });
+        const responseBody = await response.json().catch(() => ({}));
+        if (response.ok) {
+            alert(responseBody.message || 'Logged in successfully!');
+            loginForm.reset();
+        } else {
+            alert(responseBody.error || 'Failed to log in. Please check your credentials and try again.');
+        }
+    });
+}

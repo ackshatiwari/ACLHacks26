@@ -35,9 +35,12 @@ app.get('/createaccount', (req, res) => {
 });
 
 app.get('/signin', (req, res) => {
-	res.sendFile(path.join(publicDir, 'signin.html'));
+    res.sendFile(path.join(publicDir, 'signin.html'));
 });
 
+app.get('/login_to_account', (req, res) => {
+    res.sendFile(path.join(publicDir, 'login_to_account.html'));
+});
 
 
 
@@ -63,19 +66,21 @@ app.post('/api/createaccount', async (req, res) => {
 		first_name: first_name.trim(),
 		last_name: last_name.trim(),
 		phone_number: phone_number.trim(),
-		country: country.trim()
+		country: country.trim(),
+        username: username.trim()
 	};
 
 	try {
 
 		await sql`
-			INSERT INTO users (first_name, last_name, phone_number, country, password)
+			INSERT INTO users (first_name, last_name, phone_number, country, password, username)
 			VALUES (
 				${normalized.first_name},
                 ${normalized.last_name},
                 ${normalized.phone_number},
                 ${normalized.country},
-                ${normalized.password}
+                ${normalized.password},
+                ${normalized.username}
 			)
 		`;
 
@@ -88,6 +93,29 @@ app.post('/api/createaccount', async (req, res) => {
 		console.error('Database error during account creation:', error);
 		res.status(500).json({ error: 'Failed to create account.' });
 	}
+});
+
+app.post('/api/login-to-account', async (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password || !String(username).trim() || !String(password).trim()) {
+        return res.status(400).json({ error: 'Username and password are required.' });
+    }
+    if (!sql) {
+        return res.status(500).json({ error: 'Database is not configured' });
+    }
+
+    try {
+        const user = await sql`
+            SELECT * FROM users WHERE username = ${String(username).trim()} AND password = ${String(password).trim()}
+        `;
+        if (user.length === 0) {
+            return res.status(401).json({ error: 'Invalid username or password.' });
+        }
+        res.status(200).json({ message: 'Login successful!' });
+    } catch (error) {
+        console.error('Database error during login:', error);
+        res.status(500).json({ error: 'Failed to log in.' });
+    }   
 });
 
 app.use((req, res) => {
