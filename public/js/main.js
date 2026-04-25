@@ -26,6 +26,8 @@ if (document.getElementById('createAccountForm')) {
             const responseBody = await response.json().catch(() => ({}));
 
             if (response.ok) {
+                sessionStorage.setItem('username', username);
+                console.log('✓ Username stored in sessionStorage:', sessionStorage.getItem('username'));
                 alert(responseBody.message || 'Account created successfully!');
                 createAccountForm.reset();
             } else {
@@ -52,6 +54,8 @@ if (document.getElementById('login-account-form')) {
         });
         const responseBody = await response.json().catch(() => ({}));
         if (response.ok) {
+            sessionStorage.setItem('username', username);
+            console.log('✓ Username stored in sessionStorage:', sessionStorage.getItem('username'));
             alert(responseBody.message || 'Logged in successfully!');
             loginForm.reset();
         } else {
@@ -61,6 +65,11 @@ if (document.getElementById('login-account-form')) {
 }
 
 if (document.getElementById('register-organ-form')) {
+    console.log(sessionStorage.getItem('username'));
+    if (sessionStorage.getItem('username') === null) {
+        alert('You must be logged in to register an organ. Redirecting to login page.');
+        window.location.href = '/login_to_account';
+    }
     const registerOrganForm = document.getElementById('register-organ-form');
     const organSelect = document.getElementById('organ');
     organSelect.addEventListener('change', () => {

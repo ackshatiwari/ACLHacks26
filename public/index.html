@@ -3,8 +3,99 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Organ Transplant - </title>
+  <title>Organ Donor and Transplant Hub</title>
   <link rel="stylesheet" href="/css/styles.css" />
+  <style>
+    .landing {
+      max-width: 1040px;
+      margin: 2rem auto 3rem;
+      padding: 0 1rem;
+      display: grid;
+      gap: 1.25rem;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 2rem;
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at 8% 10%, rgba(15, 118, 110, 0.22), transparent 42%),
+        radial-gradient(circle at 92% 80%, rgba(45, 212, 191, 0.2), transparent 40%),
+        linear-gradient(150deg, #ffffff 0%, #f4fffc 100%);
+      border: 1px solid #d9f2ec;
+      box-shadow: 0 16px 42px rgba(15, 118, 110, 0.12);
+    }
+
+    .hero h2 {
+      margin: 0;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      letter-spacing: 0.2px;
+    }
+
+    .hero p {
+      max-width: 66ch;
+      margin-top: 0.65rem;
+      margin-bottom: 0;
+    }
+
+    .quick-actions {
+      margin-top: 1.1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+    }
+
+    .ghost {
+      text-decoration: none;
+      color: #0f766e;
+      border: 1px solid #0f766e;
+      padding: 0.5rem 0.9rem;
+      border-radius: 0.5rem;
+      font-size: 0.9rem;
+      background: #ffffff;
+    }
+
+    .section-card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 1.1rem 1.2rem;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.05);
+    }
+
+    .section-card h3 {
+      margin-top: 0;
+      margin-bottom: 0.55rem;
+    }
+
+    .organs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.75rem;
+      margin-top: 0.9rem;
+    }
+
+    .organ-pill {
+      border: 1px solid #d1fae5;
+      background: #f0fdf9;
+      border-radius: 12px;
+      padding: 0.8rem 0.85rem;
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .organ-pill strong {
+      font-size: 0.98rem;
+    }
+
+    .rules {
+      margin: 0.2rem 0 0;
+      padding-left: 1.1rem;
+      line-height: 1.55;
+      color: #4b5563;
+    }
+  </style>
 </head>
 <body>
   <header class="site-header">
@@ -16,18 +107,58 @@
     </nav>
   </header>
 
-  <main class="container">
-    <section class="card">
-      <h2>Home Page</h2>
-      <p>Your Express app is up and running.</p>
-      <p>This page is rendered from a static HTML file served by Express routes.</p>
+  <main class="landing">
+    <section class="hero">
+      <h2>Give Life. Receive Hope.</h2>
+      <p>
+        A guided space for organ donors and recipients. Check eligibility, register your organ details,
+        and move through the process with clear next steps.
+      </p>
+      <div class="quick-actions">
+        <a class="button" href="/createaccount">Create Account</a>
+        <a class="ghost" href="/registerorgans">Register Organ</a>
+      </div>
+    </section>
+
+    <section class="section-card">
+      <h3>What You Can Donate or Receive</h3>
+      <p>Each organ type requires doctor screening before it can be matched.</p>
+      <div class="organs-grid">
+        <article class="organ-pill">
+          <strong>Kidney</strong>
+          <span>Compatibility includes blood type and HLA factors.</span>
+        </article>
+        <article class="organ-pill">
+          <strong>Liver</strong>
+          <span>Segment-based matching and liver health evaluation.</span>
+        </article>
+        <article class="organ-pill">
+          <strong>Lung</strong>
+          <span>Size, blood type, and pTLC are key criteria.</span>
+        </article>
+        <article class="organ-pill">
+          <strong>Heart</strong>
+          <span>Urgency, body size, and tissue compatibility matter most.</span>
+        </article>
+      </div>
+    </section>
+
+    <section class="section-card">
+      <h3>Who Usually Cannot Donate</h3>
+      <ul class="rules">
+        <li>Under 18 years old</li>
+        <li>BMI over 35</li>
+        <li>Major uncontrolled physical health conditions</li>
+        <li>Severe unmanaged mental health conditions</li>
+        <li>Active smoking or substance abuse</li>
+      </ul>
     </section>
   </main>
 
   <footer>
-    <small>&copy; <span id="year"></span> Express Boilerplate</small>
+    <small>&copy; <span id="year"></span> Organ Transplant App</small>
   </footer>
 
-  <script src="js/main.js"></script>
+  <script src="/js/main.js"></script>
 </body>
 </html>
