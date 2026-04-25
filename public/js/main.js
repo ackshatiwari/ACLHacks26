@@ -106,7 +106,7 @@ if (document.getElementById('register-organ-form')) {
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 username,
-                                organ: organType,
+                                organ: organType.toLowerCase(),
                                 bloodtype,
                                 size,
                                 ptlc,

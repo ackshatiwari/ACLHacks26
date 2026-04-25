@@ -9,7 +9,7 @@
     <body>
         <h1>Register Organs</h1>
         <div class="container">
-            <form id="register-organ-form" action="/registerorgans" method="POST">
+            <form id="register-organ-form" onsubmit="return false;">
                 <label for="organ">Organ to Register:</label>
                 <select id="organ" name="organ" required>
                     <option value="">Select an organ</option>
@@ -22,7 +22,7 @@
 
                 <button type="submit">Register Organ</button>
             </form>
-    </div>
+        </div>
     <script src="/js/main.js"></script>
     </body>
 </html>
