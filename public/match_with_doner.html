@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Match with Donor</title>
+        <link rel="stylesheet" href="/css/styles.css" />
+    </head>
+    <body>
+        <h1>Match with Donor</h1>
+        <div class="container">
+            <form id="match-with-donor-form" onsubmit="return false;">
+                <label for="organ">Organ Needed:</label>
+                <select id="organ" name="organ" required>
+                    <option value="">Select an organ</option>
+                    <option value="kidney">Kidney</option>
+                    <option value="liver">Liver</option>
+                    <option value="lung">Lung</option>
+                    <option value="heart">Heart</option>
+                </select>
+
+                <button type="submit">Find Matches</button>
+            </form>
+            <div id="matches-container"></div>
+        </div>
+    <script src="/js/main.js"></script>
+    </body>
+</html>

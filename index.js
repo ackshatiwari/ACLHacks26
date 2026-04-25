@@ -46,6 +46,10 @@ app.get('/registerorgans', (req, res) => {
     res.sendFile(path.join(publicDir, 'registerorgans.html'));
 });
 
+app.get('/match_with_donor', (req, res) => {
+    res.sendFile(path.join(publicDir, 'match_with_doner.html'));
+});
+
 
 
 
