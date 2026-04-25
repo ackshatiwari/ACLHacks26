@@ -50,8 +50,8 @@ app.get('/registerorgans', (req, res) => {
 
 
 app.post('/api/createaccount', async (req, res) => {
-	const { username, password, first_name, last_name, phone_number, country } = req.body;
-	const requiredFields = [username, password, first_name, last_name, phone_number, country];
+	const { username, password, first_name, last_name, phone_number, country, age, height, gender } = req.body;
+	const requiredFields = [username, password, first_name, last_name, phone_number, country, age, height, gender];
 
     // Validate that all required fields are present and not just whitespace
 	if (requiredFields.some((value) => !String(value || '').trim())) {
@@ -71,20 +71,26 @@ app.post('/api/createaccount', async (req, res) => {
 		last_name: last_name.trim(),
 		phone_number: phone_number.trim(),
 		country: country.trim(),
-        username: username.trim()
+        username: username.trim(),
+		age: parseInt(age),
+		height: parseInt(height),
+		gender: gender.trim()
 	};
 
 	try {
 
 		await sql`
-			INSERT INTO users (first_name, last_name, phone_number, country, password, username)
+			INSERT INTO users (first_name, last_name, phone_number, country, password, username, age, height, gender)
 			VALUES (
 				${normalized.first_name},
                 ${normalized.last_name},
                 ${normalized.phone_number},
                 ${normalized.country},
                 ${normalized.password},
-                ${normalized.username}
+                ${normalized.username},
+				${normalized.age},
+				${normalized.height},
+				${normalized.gender}
 			)
 		`;
 
@@ -120,6 +126,11 @@ app.post('/api/login-to-account', async (req, res) => {
         console.error('Database error during login:', error);
         res.status(500).json({ error: 'Failed to log in.' });
     }   
+});
+
+
+app.post('/api/register-organs', async (req, res) => {
+    const { username, organName, arrayOfDataReceived } = req.body;
 });
 
 app.use((req, res) => {
