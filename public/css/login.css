@@ -1,72 +1,83 @@
-body {
-  height: 100vh;
-  background: linear-gradient(135deg, #882423, #c85050);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.login-layout {
+  min-height: calc(100vh - 160px);
+  display: grid;
+  place-items: center;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
 }
 
-/* Card container */
-.container {
+.login-card {
+  width: 100%;
+  max-width: 440px;
+  border-radius: 16px;
+  border: 1px solid #d9f2ec;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(15, 118, 110, 0.14), transparent 36%),
+    linear-gradient(160deg, #ffffff 0%, #f5fffd 100%);
+  box-shadow: 0 16px 42px rgba(15, 118, 110, 0.12);
+}
+
+.login-card h2 {
+  margin: 0 0 0.35rem;
+  color: #0f766e;
+}
+
+.login-card p {
+  margin-top: 0;
+}
+
+#login-account-form {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.65rem;
+}
+
+#login-account-form label {
+  font-size: 0.92rem;
+  color: #334155;
+  font-weight: 600;
+}
+
+#login-account-form input {
+  width: 100%;
+  padding: 0.7rem 0.8rem;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
   background: #ffffff;
-  padding: 35px 30px;
-  width: 340px;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  text-align: center;
+  font-size: 0.95rem;
 }
 
-/* Title */
-.container h1 {
-  margin-bottom: 20px;
-  color: #bb3028;
-}
-
-/* Form layout */
-form {
-  display: flex;
-  flex-direction: column;
-  text-align: left;
-}
-
-/* Labels */
-label {
-  font-size: 14px;
-  margin-bottom: 5px;
-  color: #333;
-}
-
-/* Inputs */
-input {
-  padding: 10px;
-  margin-bottom: 15px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-  transition: 0.2s;
-}
-
-/* Input focus effect */
-input:focus {
-  border-color: #c23131;
-  box-shadow: 0 0 5px rgba(119, 14, 6, 0.3);
+#login-account-form input:focus {
   outline: none;
+  border-color: #0f766e;
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.16);
 }
 
-/* Button */
-button {
-  background: #d02a2a;
-  color: white;
-  padding: 12px;
-  border: none;
-  border-radius: 6px;
-  font-size: 15px;
+#login-account-form button {
+  margin-top: 0.5rem;
+  border: 0;
+  border-radius: 10px;
+  background: #0f766e;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.72rem 0.9rem;
   cursor: pointer;
-  transition: 0.3s;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
-/* Button hover */
-button:hover {
-  background: #b32f2d;
-  transform: scale(1.02);
+#login-account-form button:hover {
+  background: #0c5f58;
+  transform: translateY(-1px);
+}
+
+.login-card small {
+  display: block;
+  margin-top: 0.95rem;
+  color: #64748b;
+}
+
+.login-card a {
+  color: #0f766e;
+  font-weight: 600;
 }
