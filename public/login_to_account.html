@@ -5,21 +5,38 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Log In to Account</title>
         <link rel="stylesheet" href="/css/styles.css" />
+        <link rel="stylesheet" href="/css/login.css" />
     </head>
     <body>
-        <div class="container" >
-            <h1>Sign In</h1>
-            <form id="login-account-form" action="/api/login-to-account" method="POST">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" required />
+        <header class="site-header">
+            <h1>Organ Transplant App</h1>
+            <nav>
+                <a href="/">Home</a>
+                <a href="/createaccount">Create Account</a>
+                <a href="/contact">Contact</a>
+            </nav>
+        </header>
 
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required />
+        <main class="container login-layout">
+            <section class="card login-card">
+                <h2>Sign In</h2>
+                <p>Access your account to continue donor or recipient registration.</p>
+                <form id="login-account-form" action="/api/login-to-account" method="POST">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required />
 
-                
-                <button type="submit">Create Account</button>
-            </form>
-        </div>
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required />
+
+                    <button type="submit">Sign In</button>
+                </form>
+                <small>New here? <a href="/createaccount">Create an account</a>.</small>
+            </section>
+        </main>
+
+        <footer>
+            <small>&copy; <span id="year"></span> Organ Transplant App</small>
+        </footer>
         <script src="/js/main.js"></script>
     </body>
 </html>
