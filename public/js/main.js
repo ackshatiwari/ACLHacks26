@@ -17,6 +17,7 @@ if (document.getElementById('createAccountForm')) {
         const age = document.getElementById('age').value;
         const height = document.getElementById('height').value;
         const gender = document.getElementById('gender').value;
+        const bloodType = document.getElementById('blood_type').value;
 
         try {
             const response = await fetch('/api/createaccount', {
@@ -24,7 +25,7 @@ if (document.getElementById('createAccountForm')) {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ username, password, first_name, last_name, phone_number, country, age, height, gender })
+                body: JSON.stringify({ username, password, first_name, last_name, phone_number, country, age, height, gender, bloodType })
             });
             const responseBody = await response.json().catch(() => ({}));
 
@@ -210,6 +211,179 @@ if (document.getElementById('register-organ-form')) {
                 document.querySelector('.container').innerHTML = liverFormHtml;
                 attachSubmit('liver-registration-form', 'Liver');
             }
+    });
+}
+
+
+const attachSubmitFindMatch = (formId, organType) => {
+    const form = document.getElementById(formId);
+    if (!form) return;
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = sessionStorage.getItem('username');
+        const bloodtype = document.getElementById('bloodtype').value;
+        const hla = document.getElementById('hla')?.value || null;
+        const ptlc = document.getElementById('ptlc')?.value || null;
+        try {
+            const response = await fetch('/api/findmatches', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username,
+                    organ: organType.toLowerCase(),
+                    bloodtype,
+                    hla,
+                    ptlc
+                })
+            });
+            const data = await response.json().catch(() => ({}));
+            if (response.ok) {
+                const matches = Array.isArray(data.matches) ? data.matches : [];
+                const resultsEl = document.getElementById('matches-container');
+
+                if (resultsEl) {
+                    if (matches.length === 0) {
+                        resultsEl.innerHTML = '<p>No matches found.</p>';
+                    } else {
+                        resultsEl.innerHTML = `
+                            <h3>${organType} Matches</h3>
+                            <div style="overflow-x:auto;">
+                                <table style="width:100%; border-collapse: collapse;">
+                                    <thead>
+                                        <tr>
+                                            <th style="border:1px solid #ddd; padding:8px; text-align:left;">First Name</th>
+                                            <th style="border:1px solid #ddd; padding:8px; text-align:left;">Last Name</th>
+                                            <th style="border:1px solid #ddd; padding:8px; text-align:left;">Phone Number</th>
+                                            <th style="border:1px solid #ddd; padding:8px; text-align:left;">Country</th>
+                                            <th style="border:1px solid #ddd; padding:8px; text-align:left;">Age</th>
+                                            <th style="border:1px solid #ddd; padding:8px; text-align:left;">Blood Type</th>
+                                            <th style="border:1px solid #ddd; padding:8px; text-align:left;">Organ Size</th>
+                                            <th style="border:1px solid #ddd; padding:8px; text-align:left;">HLA</th>
+                                            <th style="border:1px solid #ddd; padding:8px; text-align:left;">pTLC</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${matches.map((match) => `
+                                            <tr>
+                                                <td style="border:1px solid #ddd; padding:8px;">${match.first_name ?? ''}</td>
+                                                <td style="border:1px solid #ddd; padding:8px;">${match.last_name ?? ''}</td>
+                                                <td style="border:1px solid #ddd; padding:8px;">${match.phone_number ?? ''}</td>
+                                                <td style="border:1px solid #ddd; padding:8px;">${match.country ?? ''}</td>
+                                                <td style="border:1px solid #ddd; padding:8px;">${match.age ?? ''}</td>
+                                                <td style="border:1px solid #ddd; padding:8px;">${match.blood_type ?? ''}</td>
+                                                <td style="border:1px solid #ddd; padding:8px;">${match.size ?? ''}</td>
+                                                <td style="border:1px solid #ddd; padding:8px;">${match.hla ?? ''}</td>
+                                                <td style="border:1px solid #ddd; padding:8px;">${match.ptlc ?? ''}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        `;
+                    }
+                }
+
+                form.reset();
+            } else {
+                alert(data.error || `Failed to find matches for ${organType}. Please try again.`);
+            }
+        } catch (error) {
+            console.error(`Error finding matches for ${organType}:`, error);
+            alert(`An error occurred while finding matches for ${organType}. Please try again.`);
+        }
+    });
+};
+
+if (document.getElementById('match-with-donor-form')){
+    const organSelect = document.getElementById('match-organ');
+    organSelect.addEventListener('change', () => {
+        const organ = document.getElementById('match-organ').value;
+        if (organ === '') {
+            alert('Please select an organ to find matches for.');
+            return;
+        }
+
+        if (organ.trim() === 'liver') {
+            const liverMatchFormHtml = `
+                <h2>Liver Match Lookup</h2>
+                <form id="liver-match-form">
+                    <label for="bloodtype">Blood Type:</label>
+                    <select id="bloodtype" name="bloodtype" required>
+                        <option value="">Select blood type</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="AB">AB</option>
+                        <option value="O">O</option>
+                    </select>
+                    <button type="submit" id="liverMatchSubmit">Find Liver Matches</button>
+                </form>
+                <div id="matches-container"></div>
+            `;
+
+            document.querySelector('.container').innerHTML = liverMatchFormHtml;
+            attachSubmitFindMatch('liver-match-form', 'Liver');
+        } else if (organ.trim() === 'kidney') {
+            const kidneyMatchFormHtml = `
+                <h2>Kidney Match Lookup</h2>
+                <form id="kidney-match-form">
+                    <label for="bloodtype">Blood Type:</label>
+                    <select id="bloodtype" name="bloodtype" required>
+                        <option value="">Select blood type</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="AB">AB</option>
+                        <option value="O">O</option>
+                    </select>
+                    <label for="hla">HLA Typing:</label>
+                    <input type="text" id="hla" name="hla" required>
+                    <button type="submit" id="kidneyMatchSubmit">Find Kidney Matches</button>
+                </form>
+                <div id="matches-container"></div>
+            `;
+
+            document.querySelector('.container').innerHTML = kidneyMatchFormHtml;
+            attachSubmitFindMatch('kidney-match-form', 'Kidney');
+        } else if (organ.trim() === 'lung') {
+            const lungMatchFormHtml = `
+                <h2>Lung Match Lookup</h2>
+                <form id="lung-match-form">
+                    <label for="bloodtype">Blood Type:</label>
+                    <select id="bloodtype" name="bloodtype" required>
+                        <option value="">Select blood type</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="AB">AB</option>
+                        <option value="O">O</option>
+                    </select>
+                    <label for="ptlc">Predicted Total Lung Capacity (pTLC) (in liters):</label>
+                    <input type="number" id="ptlc" name="ptlc" required>
+                    <button type="submit" id="lungMatchSubmit">Find Lung Matches</button>
+                </form>
+                <div id="matches-container"></div>
+            `;
+
+            document.querySelector('.container').innerHTML = lungMatchFormHtml;
+            attachSubmitFindMatch('lung-match-form', 'Lung');
+        } else if (organ.trim() === 'heart') {
+            const heartMatchFormHtml = `
+                <h2>Heart Match Lookup</h2>
+                <form id="heart-match-form">
+                    <label for="bloodtype">Blood Type:</label>
+                    <select id="bloodtype" name="bloodtype" required>
+                        <option value="">Select blood type</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="AB">AB</option>
+                        <option value="O">O</option>
+                    </select>
+                    <button type="submit" id="heartMatchSubmit">Find Heart Matches</button>
+                </form>
+                <div id="matches-container"></div>
+            `;
+
+            document.querySelector('.container').innerHTML = heartMatchFormHtml;
+            attachSubmitFindMatch('heart-match-form', 'Heart');
+        }
     });
 }
 
