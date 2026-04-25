@@ -42,6 +42,10 @@ app.get('/login_to_account', (req, res) => {
     res.sendFile(path.join(publicDir, 'login_to_account.html'));
 });
 
+app.get('/dashboard', (req, res) => {
+    res.sendFile(path.join(publicDir, 'dashboard.html'));
+});
+
 app.get('/registerorgans', (req, res) => {
     res.sendFile(path.join(publicDir, 'registerorgans.html'));
 });
@@ -138,6 +142,68 @@ app.post('/api/login-to-account', async (req, res) => {
     } catch (error) {
         console.error('Database error during login:', error);
         res.status(500).json({ error: 'Failed to log in.' });
+    }
+});
+
+app.get('/api/dashboard', async (req, res) => {
+    const username = String(req.query.username || '').trim();
+
+    if (!username) {
+        return res.status(400).json({ error: 'Username is required.' });
+    }
+    if (!sql) {
+        return res.status(500).json({ error: 'Database is not configured' });
+    }
+
+    try {
+        const users = await sql`
+            SELECT id, first_name, last_name, email, phone_number, country, age, height, gender, blood_type, username
+            FROM public.users
+            WHERE username = ${username}
+        `;
+
+        if (users.length === 0) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+
+        const user = users[0];
+
+        const kidneys = await sql`
+            SELECT blood_type, hla, size
+            FROM public.kidneys
+            WHERE user_id = ${user.id}
+        `;
+
+        const livers = await sql`
+            SELECT blood_type, size
+            FROM public.livers
+            WHERE user_id = ${user.id}
+        `;
+
+        const lungs = await sql`
+            SELECT blood_type, size, ptlc
+            FROM public.lungs
+            WHERE user_id = ${user.id}
+        `;
+
+        const hearts = await sql`
+            SELECT blood_type, size
+            FROM public.hearts
+            WHERE user_id = ${user.id}
+        `;
+
+        res.status(200).json({
+            user,
+            organs: {
+                kidneys,
+                livers,
+                lungs,
+                hearts
+            }
+        });
+    } catch (error) {
+        console.error('Database error during dashboard lookup:', error);
+        res.status(500).json({ error: 'Failed to load dashboard data.' });
     }
 });
 

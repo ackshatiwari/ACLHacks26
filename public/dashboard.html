@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <style>
+    :root {
+      --bg: #f5faf8;
+      --panel: rgba(255, 255, 255, 0.88);
+      --border: #dbe7e1;
+      --text: #102018;
+      --muted: #4b6156;
+      --accent: #0f766e;
+      --accent-2: #115e59;
+      --shadow: 0 18px 50px rgba(15, 23, 42, 0.12);
+    }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(16, 185, 129, 0.14), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(34, 197, 94, 0.12), transparent 28%),
+        linear-gradient(180deg, #fbfefc 0%, var(--bg) 100%);
+      min-height: 100vh;
+      font-family: "Trebuchet MS", "Gill Sans", "Segoe UI", sans-serif;
+    }
+
+    .dashboard-shell {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 1.25rem 1rem 3rem;
+    }
+
+    .dashboard-hero {
+      display: grid;
+      gap: 1rem;
+      padding: 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      background: var(--panel);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+    }
+
+    .dashboard-hero h1 {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 3.25rem);
+      line-height: 1;
+    }
+
+    .dashboard-hero p {
+      margin: 0;
+      max-width: 70ch;
+      color: var(--muted);
+      font-size: 1.02rem;
+      line-height: 1.6;
+    }
+
+    .hero-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 0.25rem;
+    }
+
+    .hero-links a {
+      text-decoration: none;
+      color: white;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      padding: 0.7rem 1rem;
+      border-radius: 999px;
+      font-weight: 700;
+      box-shadow: 0 10px 24px rgba(15, 118, 110, 0.22);
+    }
+
+    .hero-links a.secondary {
+      color: var(--accent);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      box-shadow: none;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .panel {
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 1rem 1.1rem;
+      border-bottom: 1px solid #e7efea;
+      background: linear-gradient(135deg, #effaf7 0%, #ffffff 82%);
+    }
+
+    .panel-header h2,
+    .panel-header h3 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .panel-body {
+      padding: 1rem 1.1rem 1.15rem;
+      display: grid;
+      gap: 0.8rem;
+    }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 0.8rem;
+    }
+
+    .detail-item {
+      padding: 0.85rem;
+      border-radius: 16px;
+      border: 1px solid #e6eeea;
+      background: #fff;
+    }
+
+    .detail-label {
+      display: block;
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.35rem;
+    }
+
+    .detail-value {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .organ-stack {
+      display: grid;
+      gap: 0.85rem;
+    }
+
+    .organ-card {
+      border: 1px solid #e3ece6;
+      border-radius: 18px;
+      background: linear-gradient(180deg, #ffffff 0%, #f9fcfb 100%);
+      padding: 1rem;
+    }
+
+    .organ-card h4 {
+      margin: 0 0 0.65rem;
+      font-size: 1.05rem;
+    }
+
+    .organ-metadata {
+      display: grid;
+      gap: 0.4rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .empty-state {
+      margin: 0;
+      padding: 0.9rem 1rem;
+      border-radius: 14px;
+      background: #f4fbf8;
+      color: var(--muted);
+      border: 1px dashed #bdd9cf;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      background: #e7fbf5;
+      color: var(--accent-2);
+      font-weight: 700;
+      width: fit-content;
+    }
+
+    .loading,
+    .error {
+      padding: 1rem 1.1rem;
+      border-radius: 16px;
+      background: #fff;
+      border: 1px solid var(--border);
+    }
+
+    @media (max-width: 900px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <h1>Organ Transplant App</h1>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/registerorgans">Register Organ</a>
+      <a href="/match_with_donor">Find Matches</a>
+      <a href="/login_to_account">Sign Out</a>
+    </nav>
+  </header>
+
+  <main class="dashboard-shell">
+    <section class="dashboard-hero">
+      <div class="status-pill">Dashboard</div>
+      <h1 id="dashboard-title">Your account</h1>
+      <p>
+        Review your profile, organ registrations, and the details used for matching.
+      </p>
+      <div class="hero-links">
+        <a href="/registerorgans">Register an organ</a>
+        <a href="/match_with_donor" class="secondary">Find matches</a>
+      </div>
+    </section>
+
+    <div id="dashboard-content" class="dashboard-grid" aria-live="polite">
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Loading profile</h2>
+        </div>
+        <div class="panel-body">
+          <div class="loading">Fetching your account details...</div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const username = sessionStorage.getItem('username');
+    const contentEl = document.getElementById('dashboard-content');
+    const titleEl = document.getElementById('dashboard-title');
+
+    if (!username) {
+      window.location.href = '/login_to_account';
+    } else {
+      titleEl.textContent = `${username}'s dashboard`;
+
+      fetch(`/api/dashboard?username=${encodeURIComponent(username)}`)
+        .then(async (response) => {
+          const body = await response.json().catch(() => ({}));
+          if (!response.ok) {
+            throw new Error(body.error || 'Failed to load dashboard.');
+          }
+          return body;
+        })
+        .then((data) => {
+          const user = data.user || {};
+          const organs = data.organs || {};
+
+          const renderOrganCard = (label, items, formatter) => {
+            if (!Array.isArray(items) || items.length === 0) {
+              return `
+                <article class="organ-card">
+                  <h4>${label}</h4>
+                  <p class="empty-state">No ${label.toLowerCase()} registrations yet.</p>
+                </article>
+              `;
+            }
+
+            return `
+              <article class="organ-card">
+                <h4>${label}</h4>
+                <div class="organ-stack">
+                  ${items.map((item) => formatter(item)).join('')}
+                </div>
+              </article>
+            `;
+          };
+
+          contentEl.innerHTML = `
+            <section class="panel">
+              <div class="panel-header">
+                <h2>Profile</h2>
+              </div>
+              <div class="panel-body">
+                <div class="details-grid">
+                  <div class="detail-item"><span class="detail-label">First Name</span><span class="detail-value">${user.first_name ?? ''}</span></div>
+                  <div class="detail-item"><span class="detail-label">Last Name</span><span class="detail-value">${user.last_name ?? ''}</span></div>
+                  <div class="detail-item"><span class="detail-label">Email</span><span class="detail-value">${user.email ?? ''}</span></div>
+                  <div class="detail-item"><span class="detail-label">Phone Number</span><span class="detail-value">${user.phone_number ?? ''}</span></div>
+                  <div class="detail-item"><span class="detail-label">Country</span><span class="detail-value">${user.country ?? ''}</span></div>
+                  <div class="detail-item"><span class="detail-label">Age</span><span class="detail-value">${user.age ?? ''}</span></div>
+                  <div class="detail-item"><span class="detail-label">Height</span><span class="detail-value">${user.height ?? ''}</span></div>
+                  <div class="detail-item"><span class="detail-label">Gender</span><span class="detail-value">${user.gender ?? ''}</span></div>
+                  <div class="detail-item"><span class="detail-label">Blood Type</span><span class="detail-value">${user.blood_type ?? ''}</span></div>
+                </div>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <h2>Organ Registrations</h2>
+              </div>
+              <div class="panel-body">
+                ${renderOrganCard('Kidneys', organs.kidneys, (item) => `
+                  <div class="detail-item">
+                    <span class="detail-label">Kidney</span>
+                    <span class="detail-value">${item.blood_type ?? ''}</span>
+                    <div class="organ-metadata">
+                      <span><strong>HLA:</strong> ${item.hla ?? ''}</span>
+                      <span><strong>Size:</strong> ${item.size ?? ''}</span>
+                    </div>
+                  </div>
+                `)}
+
+                ${renderOrganCard('Livers', organs.livers, (item) => `
+                  <div class="detail-item">
+                    <span class="detail-label">Liver</span>
+                    <span class="detail-value">${item.blood_type ?? ''}</span>
+                    <div class="organ-metadata">
+                      <span><strong>Size:</strong> ${item.size ?? ''}</span>
+                    </div>
+                  </div>
+                `)}
+
+                ${renderOrganCard('Lungs', organs.lungs, (item) => `
+                  <div class="detail-item">
+                    <span class="detail-label">Lung</span>
+                    <span class="detail-value">${item.blood_type ?? ''}</span>
+                    <div class="organ-metadata">
+                      <span><strong>Size:</strong> ${item.size ?? ''}</span>
+                      <span><strong>pTLC:</strong> ${item.ptlc ?? ''}</span>
+                    </div>
+                  </div>
+                `)}
+
+                ${renderOrganCard('Hearts', organs.hearts, (item) => `
+                  <div class="detail-item">
+                    <span class="detail-label">Heart</span>
+                    <span class="detail-value">${item.blood_type ?? ''}</span>
+                    <div class="organ-metadata">
+                      <span><strong>Size:</strong> ${item.size ?? ''}</span>
+                    </div>
+                  </div>
+                `)}
+              </div>
+            </section>
+          `;
+        })
+        .catch((error) => {
+          contentEl.innerHTML = `
+            <section class="panel">
+              <div class="panel-header">
+                <h2>Dashboard unavailable</h2>
+              </div>
+              <div class="panel-body">
+                <div class="error">${error.message}</div>
+              </div>
+            </section>
+          `;
+        });
+    }
+  </script>
+</body>
+</html>

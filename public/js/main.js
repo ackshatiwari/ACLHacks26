@@ -4,6 +4,16 @@ if (yearEl) {
   yearEl.textContent = new Date().getFullYear();
 }
 
+const authLink = document.getElementById('auth-link');
+const welcomeUser = document.getElementById('welcome-user');
+const username = sessionStorage.getItem('username');
+
+if (username && authLink && welcomeUser) {
+        authLink.hidden = true;
+        welcomeUser.hidden = false;
+        welcomeUser.textContent = `Welcome, ${username}`;
+}
+
 if (document.getElementById('createAccountForm')) {
   const createAccountForm = document.getElementById('createAccountForm');
     createAccountForm.addEventListener('submit', async (e) => {
@@ -35,6 +45,7 @@ if (document.getElementById('createAccountForm')) {
                 console.log('✓ Username stored in sessionStorage:', sessionStorage.getItem('username'));
                 alert(responseBody.message || 'Account created successfully!');
                 createAccountForm.reset();
+                window.location.href = '/dashboard';
             } else {
                 alert(responseBody.error || 'Failed to create account. Please try again.');
             }
@@ -62,6 +73,7 @@ if (document.getElementById('login-account-form')) {
             sessionStorage.setItem('username', username);
             console.log('✓ Username stored in sessionStorage:', sessionStorage.getItem('username'));
             alert(responseBody.message || 'Logged in successfully!');
+            window.location.href = '/dashboard';
             loginForm.reset();
         } else {
             alert(responseBody.error || 'Failed to log in. Please check your credentials and try again.');
@@ -349,10 +361,16 @@ const attachSubmitFindMatch = (formId, organType) => {
 
 if (document.getElementById('match-with-donor-form')){
     const organSelect = document.getElementById('match-organ');
+    const matchFormContainer = document.querySelector('.match-panel .panel-body') || document.querySelector('.container');
+
     organSelect.addEventListener('change', () => {
         const organ = document.getElementById('match-organ').value;
         if (organ === '') {
             alert('Please select an organ to find matches for.');
+            return;
+        }
+        if (!matchFormContainer) {
+            console.error('Match form container not found.');
             return;
         }
 
@@ -370,10 +388,9 @@ if (document.getElementById('match-with-donor-form')){
                     </select>
                     <button type="submit" id="liverMatchSubmit">Find Liver Matches</button>
                 </form>
-                <div id="matches-container"></div>
             `;
 
-            document.querySelector('.container').innerHTML = liverMatchFormHtml;
+            matchFormContainer.innerHTML = liverMatchFormHtml;
             attachSubmitFindMatch('liver-match-form', 'Liver');
         } else if (organ.trim() === 'kidney') {
             const kidneyMatchFormHtml = `
@@ -391,10 +408,9 @@ if (document.getElementById('match-with-donor-form')){
                     <input type="text" id="hla" name="hla" required>
                     <button type="submit" id="kidneyMatchSubmit">Find Kidney Matches</button>
                 </form>
-                <div id="matches-container"></div>
             `;
 
-            document.querySelector('.container').innerHTML = kidneyMatchFormHtml;
+            matchFormContainer.innerHTML = kidneyMatchFormHtml;
             attachSubmitFindMatch('kidney-match-form', 'Kidney');
         } else if (organ.trim() === 'lung') {
             const lungMatchFormHtml = `
@@ -412,10 +428,9 @@ if (document.getElementById('match-with-donor-form')){
                     <input type="number" id="ptlc" name="ptlc" required>
                     <button type="submit" id="lungMatchSubmit">Find Lung Matches</button>
                 </form>
-                <div id="matches-container"></div>
             `;
 
-            document.querySelector('.container').innerHTML = lungMatchFormHtml;
+            matchFormContainer.innerHTML = lungMatchFormHtml;
             attachSubmitFindMatch('lung-match-form', 'Lung');
         } else if (organ.trim() === 'heart') {
             const heartMatchFormHtml = `
@@ -431,10 +446,9 @@ if (document.getElementById('match-with-donor-form')){
                     </select>
                     <button type="submit" id="heartMatchSubmit">Find Heart Matches</button>
                 </form>
-                <div id="matches-container"></div>
             `;
 
-            document.querySelector('.container').innerHTML = heartMatchFormHtml;
+            matchFormContainer.innerHTML = heartMatchFormHtml;
             attachSubmitFindMatch('heart-match-form', 'Heart');
         }
     });
