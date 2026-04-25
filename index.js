@@ -42,6 +42,10 @@ app.get('/login_to_account', (req, res) => {
     res.sendFile(path.join(publicDir, 'login_to_account.html'));
 });
 
+app.get('/registerorgans', (req, res) => {
+    res.sendFile(path.join(publicDir, 'registerorgans.html'));
+});
+
 
 
 
