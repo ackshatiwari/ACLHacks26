@@ -59,3 +59,23 @@ if (document.getElementById('login-account-form')) {
         }
     });
 }
+
+if (document.getElementById('register-organ-form')) {
+    const registerOrganForm = document.getElementById('register-organ-form');
+    registerOrganForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const organ = document.getElementById('organ').value;
+        if (organ.value === '') alert('Please select an organ to register.');
+        else {
+            if (organ.toLowerCase() === 'lung') {
+                // Give a set of forms to fill out for the lungs
+            } else if (organ.toLowerCase === 'kidney') {
+                // Give a set of forms to fill out for the kidneys
+            } else if (organ.toLowerCase === 'heart') {
+                // Give a set of forms to fill out for the heart
+            } else if (organ.toLowerCase === 'liver') {
+                // Give a set of forms to fill out for the liver
+            }
+        }
+    });
+}
