@@ -9,7 +9,7 @@
     </head>
     <body>
         <header class="site-header">
-            <h1>FindMyDoner</h1>
+            <h1>FindMyDonor</h1>
             <nav>
                 <a href="/">Home</a>
                 <a href="/login_to_account">Sign In</a>
@@ -19,9 +19,8 @@
 
         <main class="container create-layout">
             <section class="card create-card">
-                <h2>Create Your Account</h2>
-                <p>Set up your profile to start donor registration and matching steps.</p>
-                <form id="createAccountForm" action="/api/createaccount" method="POST">
+                <h2>Create Account</p>
+                <form id="createHealthReviewForm">
                     <label for="username">Username</label>
                     <input type="text" id="username" name="username" required />
 
@@ -61,8 +60,24 @@
                     <label for="blood_type">Blood Type</label>
                     <input type="text" id="blood_type" name="blood_type" required />
 
+                    <label for="physical_report">Latest Physical Report</label>
+                    <input type="file" id="physical_report" name="physical_report" accept=".pdf,image/*" required />
 
-                    
+                    <div id="processing-status" class="processing-status" hidden aria-live="polite">
+                        <div class="processing-heading">
+                            <span class="processing-dot" aria-hidden="true"></span>
+                            <strong id="processing-label">AI is processing your report</strong>
+                        </div>
+                        <p id="processing-text">Uploading and analyzing your physical report...</p>
+                        <div class="processing-track" aria-hidden="true">
+                            <div class="processing-fill"></div>
+                        </div>
+                        <div id="process-complete" class="process-complete" hidden>Process Complete</div>
+                    </div>
+
+
+                     <button type="button" id="start-health-review">Start AI Review</button>
+
 
                     <button type="submit">Create Account</button>
                 </form>
@@ -71,7 +86,7 @@
         </main>
 
         <footer>
-            <small>&copy; <span id="year"></span> FindMyDoner</small>
+            <small>&copy; <span id="year"></span> FindMyDonor</small>
         </footer>
         <script src="/js/main.js"></script>
     </body>

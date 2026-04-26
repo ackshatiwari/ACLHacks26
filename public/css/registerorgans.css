@@ -1,65 +1,308 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: Arial, sans-serif;
+:root {
+  --register-bg: #eef8f5;
+  --register-surface: rgba(255, 255, 255, 0.88);
+  --register-border: #d9ece6;
+  --register-text: #12312d;
+  --register-muted: #52635f;
+  --register-brand: #0f766e;
+  --register-brand-dark: #0c5f58;
+  --register-accent: #d9f2ec;
 }
+
+* {
+  box-sizing: border-box;
+}
+
 body {
+  margin: 0;
   min-height: 100vh;
-  background: linear-gradient(135deg, #0077b6, #00b4d8);
+  color: var(--register-text);
+  background:
+    radial-gradient(circle at top left, rgba(45, 212, 191, 0.16), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(15, 118, 110, 0.12), transparent 24%),
+    linear-gradient(180deg, #f6fffd 0%, var(--register-bg) 100%);
+}
+
+.site-header {
+  backdrop-filter: blur(14px);
+}
+
+.register-page {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 2rem 1rem 3rem;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.register-hero {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+  padding: 1.5rem;
+  border-radius: 24px;
+  border: 1px solid var(--register-border);
+  background:
+    radial-gradient(circle at 10% 20%, rgba(15, 118, 110, 0.16), transparent 30%),
+    radial-gradient(circle at 90% 80%, rgba(45, 212, 191, 0.18), transparent 30%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.96) 0%, rgba(244, 255, 252, 0.98) 100%);
+  box-shadow: 0 18px 50px rgba(15, 118, 110, 0.1);
+}
+
+.hero-copy {
+  display: grid;
+  gap: 0.65rem;
+  align-content: start;
+}
+
+.eyebrow {
+  display: inline-flex;
+  width: fit-content;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: #eafbf6;
+  color: var(--register-brand);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.register-hero h2 {
+  margin: 0;
+  font-size: clamp(2rem, 4.5vw, 3.5rem);
+  line-height: 1.03;
+  letter-spacing: -0.04em;
+  color: var(--register-text);
+}
+
+.register-hero p {
+  margin: 0;
+  max-width: 62ch;
+  color: var(--register-muted);
+  line-height: 1.65;
+  font-size: 1.02rem;
+}
+
+.hero-stats {
+  display: grid;
+  gap: 0.85rem;
+  align-self: center;
+}
+
+.hero-stats article {
+  padding: 1rem 1rem 1.05rem;
+  border-radius: 18px;
+  border: 1px solid #d7ebe5;
+  background: var(--register-surface);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+}
+
+.hero-stats strong {
+  display: block;
+  font-size: 0.98rem;
+  color: var(--register-text);
+  margin-bottom: 0.3rem;
+}
+
+.hero-stats span {
+  color: var(--register-muted);
+  font-size: 0.94rem;
+  line-height: 1.55;
+}
+
+.register-shell {
+  display: grid;
+  justify-items: center;
+}
+
+.register-card {
+  width: min(100%, 760px);
+  padding: 1.5rem;
+  border-radius: 24px;
+  border: 1px solid var(--register-border);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 18px 42px rgba(15, 118, 110, 0.12);
+}
+
+.register-intro h3 {
+  margin: 0;
+  font-size: 1.35rem;
+  color: var(--register-text);
+}
+
+.register-intro p {
+  margin: 0.45rem 0 0;
+  color: var(--register-muted);
+  line-height: 1.6;
+}
+
+.organ-picker {
+  margin-top: 1.15rem;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.organ-picker label {
+  color: var(--register-text);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.organ-picker select,
+.organ-picker button,
+.organ-detail input,
+.organ-detail select {
+  width: 100%;
+  border-radius: 14px;
+  font-size: 0.98rem;
+}
+
+.organ-picker select,
+.organ-detail input,
+.organ-detail select {
+  padding: 0.88rem 1rem;
+  border: 1px solid #c9ddd7;
+  background: #ffffff;
+  color: var(--register-text);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.organ-picker select:focus,
+.organ-detail input:focus,
+.organ-detail select:focus {
+  outline: none;
+  border-color: var(--register-brand);
+  box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.14);
+}
+
+.organ-picker button,
+.organ-detail button {
+  padding: 0.95rem 1.1rem;
+  border: 0;
+  background: linear-gradient(135deg, var(--register-brand), var(--register-brand-dark));
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+.organ-picker button:hover,
+.organ-detail button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(15, 118, 110, 0.22);
+}
+
+.register-note {
+  margin-top: 1rem;
   display: flex;
-  flex-direction: column;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 0.95rem 1rem;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #effaf7 0%, #ffffff 100%);
+  border: 1px solid #d8ebe5;
+}
+
+.register-note span {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-}
-body h1 {
-  color: white;
-  font-size: 50px;
-}
-.container {
-  background: #ffffff;
-  padding: 30px;
-  width: 320px;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: #eafbf6;
+  color: var(--register-brand);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
-form {
-  display: flex;
-  flex-direction: column;
+.register-note p {
+  margin: 0;
+  color: var(--register-muted);
+  line-height: 1.55;
 }
 
-label {
-  margin-bottom: 8px;
-  font-size: 14px;
-  color: #333;
-}
-select {
-  padding: 10px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  margin-bottom: 20px;
-  font-size: 14px;
-  transition: 0.2s;
+.organ-detail {
+  display: grid;
+  gap: 0.95rem;
 }
 
-select:focus {
-  border-color: #0077b6;
-  box-shadow: 0 0 5px rgba(0, 119, 182, 0.3);
-  outline: none;
-}
-button {
-  background: #0077b6;
-  color: white;
-  padding: 12px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 15px;
-  transition: 0.3s;
+.organ-detail-card {
+  padding: 1.15rem;
+  border-radius: 20px;
+  border: 1px solid #d8ebe5;
+  background: linear-gradient(180deg, #ffffff 0%, #f7fffd 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
-button:hover {
-  background: #023e8a;
-  transform: scale(1.03);
+.organ-detail-card h2,
+.organ-detail-card h3 {
+  margin: 0;
+  color: var(--register-text);
+}
+
+.organ-detail-card h2 {
+  margin-bottom: 0.35rem;
+  font-size: 1.3rem;
+}
+
+.organ-detail-card p {
+  margin: 0;
+  color: var(--register-muted);
+  line-height: 1.6;
+}
+
+.organ-detail form {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.organ-detail label {
+  color: var(--register-text);
+  font-weight: 700;
+  font-size: 0.94rem;
+}
+
+.organ-detail .form-grid {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.organ-detail .full {
+  grid-column: 1 / -1;
+}
+
+.organ-detail .hint-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--register-muted);
+  line-height: 1.55;
+}
+
+@media (max-width: 900px) {
+  .register-hero {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .register-page {
+    padding-inline: 0.85rem;
+  }
+
+  .register-card,
+  .register-hero {
+    padding: 1.15rem;
+    border-radius: 20px;
+  }
+
+  .organ-detail .form-grid {
+    grid-template-columns: 1fr;
+  }
 }

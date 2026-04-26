@@ -14,10 +14,12 @@ if (username && authLink && welcomeUser) {
     welcomeUser.textContent = `Welcome, ${username}`;
 }
 
-if (document.getElementById('createAccountForm')) {
-    const createAccountForm = document.getElementById('createAccountForm');
-    createAccountForm.addEventListener('submit', async (e) => {
+const createHealthReviewForm = document.getElementById('createHealthReviewForm');
+
+if (createHealthReviewForm) {
+    createHealthReviewForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
         const first_name = document.getElementById('first_name').value;
@@ -53,16 +55,92 @@ if (document.getElementById('createAccountForm')) {
                 sessionStorage.setItem('height', height);
                 console.log('✓ Username stored in sessionStorage:', sessionStorage.getItem('username'));
                 alert(responseBody.message || 'Account created successfully!');
-                createAccountForm.reset();
-                window.location.href = '/dashboard';
+                createHealthReviewForm.reset();
             } else {
                 alert(responseBody.error || 'Failed to create account. Please try again.');
             }
-        }
-        catch (error) {
+        } catch (error) {
             console.error('Error creating account:', error);
         }
     });
+
+    const startHealthReviewButton = document.getElementById('start-health-review');
+    const processingStatus = document.getElementById('processing-status');
+    const processingLabel = document.getElementById('processing-label');
+    const processingText = document.getElementById('processing-text');
+    const processComplete = document.getElementById('process-complete');
+    const submitButton = startHealthReviewButton;
+    let processingTimer = null;
+
+    const resetProcessingUi = () => {
+        createHealthReviewForm.classList.remove('is-processing');
+        if (processingStatus) {
+            processingStatus.hidden = true;
+        }
+        if (processComplete) {
+            processComplete.hidden = true;
+        }
+        if (processingLabel) {
+            processingLabel.textContent = 'AI is processing your report';
+        }
+        if (processingText) {
+            processingText.textContent = 'Uploading and analyzing your physical report...';
+        }
+        if (submitButton) {
+            submitButton.disabled = false;
+        }
+    };
+
+    if (startHealthReviewButton) {
+        startHealthReviewButton.addEventListener('click', () => {
+            const reportInput = document.getElementById('physical_report');
+            const reportFile = reportInput?.files?.[0];
+
+            if (!reportFile) {
+                alert('Please upload your latest physical report to continue.');
+                return;
+            }
+
+            if (processingTimer) {
+                window.clearTimeout(processingTimer);
+            }
+
+            createHealthReviewForm.classList.add('is-processing');
+            if (processingStatus) {
+                processingStatus.hidden = false;
+            }
+            if (processComplete) {
+                processComplete.hidden = true;
+            }
+            if (processingLabel) {
+                processingLabel.textContent = 'AI is processing your report';
+            }
+            if (processingText) {
+                processingText.textContent = `Reviewing ${reportFile.name} for health markers and eligibility signals...`;
+            }
+            if (submitButton) {
+                submitButton.disabled = true;
+            }
+
+            processingTimer = window.setTimeout(() => {
+                if (processingLabel) {
+                    processingLabel.textContent = 'Analysis finished';
+                }
+                if (processingText) {
+                    processingText.textContent = 'Your report has been reviewed successfully.';
+                }
+                if (processComplete) {
+                    processComplete.hidden = false;
+                }
+                if (submitButton) {
+                    submitButton.disabled = false;
+                }
+                createHealthReviewForm.classList.remove('is-processing');
+            }, 2000);
+        });
+    }
+
+    createHealthReviewForm.addEventListener('reset', resetProcessingUi);
 }
 
 if (document.getElementById('login-account-form')) {
@@ -101,148 +179,171 @@ if (document.getElementById('login-account-form')) {
 }
 
 if (document.getElementById('register-organ-form')) {
-    console.log(sessionStorage.getItem('username'));
-
     if (sessionStorage.getItem('username') === null) {
         alert('You must be logged in to register an organ. Redirecting to login page.');
         window.location.href = '/login_to_account';
     }
 
-    const registerOrganForm = document.getElementById('register-organ-form');
+    const registerShell = document.getElementById('register-shell');
     const organSelect = document.getElementById('organ');
 
+    const attachSubmit = (formId, organType) => {
+        setTimeout(() => {
+            const form = document.getElementById(formId);
+            if (!form) return;
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const username = sessionStorage.getItem('username');
+                const bloodtype = document.getElementById('bloodtype').value;
+                const size = document.getElementById('size').value;
+
+                const ptlc = document.getElementById('ptlc')?.value || null;
+                const hla = document.getElementById('hla')?.value || null;
+
+                try {
+                    const response = await fetch('/api/registerOrgan', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            username,
+                            organ: organType.toLowerCase(),
+                            bloodtype,
+                            size,
+                            ptlc,
+                            hla
+                        })
+                    });
+                    const data = await response.json().catch(() => ({}));
+                    if (response.ok) {
+                        alert(data.message || `${organType} registered successfully!`);
+                        form.reset();
+                    } else {
+                        alert(data.error || `Failed to register ${organType}. Please try again.`);
+                    }
+                } catch (error) {
+                    console.error(`Error registering ${organType}:`, error);
+                    alert(`An error occurred while registering the ${organType}. Please try again.`);
+                }
+            });
+        }, 100);
+    };
+
+    const renderOrganForm = (organ) => {
+        if (!registerShell) return;
+
+        const organName = organ.charAt(0).toUpperCase() + organ.slice(1).toLowerCase();
+        const organHints = {
+            kidney: ['Blood type compatibility', 'HLA typing', 'Size measurement'],
+            liver: ['Blood type compatibility', 'Size measurement', 'Organ health details'],
+            lung: ['Blood type compatibility', 'Lung size', 'pTLC estimate'],
+            heart: ['Blood type compatibility', 'Heart size', 'Urgency and match factors']
+        };
+
+        const hintsMarkup = (organHints[organ.toLowerCase()] || []).map((hint) => `<li>${hint}</li>`).join('');
+        const fieldsMarkup = organ.toLowerCase() === 'lung'
+            ? `
+                <div class="form-grid">
+                    <label class="full" for="bloodtype">Blood Type</label>
+                    <select class="full" id="bloodtype" name="bloodtype" required>
+                        <option value="">Select blood type</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="AB">AB</option>
+                        <option value="O">O</option>
+                    </select>
+
+                    <label class="full" for="size">Size of Lung (width x height)</label>
+                    <input class="full" type="text" id="size" name="size" placeholder="Example: 12 x 18 cm" required />
+
+                    <label class="full" for="ptlc">Predicted Total Lung Capacity</label>
+                    <input class="full" type="number" id="ptlc" name="ptlc" placeholder="Liters" required />
+                </div>
+            `
+            : organ.toLowerCase() === 'kidney'
+                ? `
+                <div class="form-grid">
+                    <label class="full" for="bloodtype">Blood Type</label>
+                    <select class="full" id="bloodtype" name="bloodtype" required>
+                        <option value="">Select blood type</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="AB">AB</option>
+                        <option value="O">O</option>
+                    </select>
+
+                    <label class="full" for="hla">HLA Typing</label>
+                    <input class="full" type="text" id="hla" name="hla" placeholder="Example: A2, B8, DR3" required />
+
+                    <label class="full" for="size">Size of Kidney</label>
+                    <input class="full" type="number" id="size" name="size" placeholder="Centimeters" required />
+                </div>
+            `
+                : organ.toLowerCase() === 'heart'
+                    ? `
+                <div class="form-grid">
+                    <label class="full" for="bloodtype">Blood Type</label>
+                    <select class="full" id="bloodtype" name="bloodtype" required>
+                        <option value="">Select blood type</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="AB">AB</option>
+                        <option value="O">O</option>
+                    </select>
+
+                    <label class="full" for="size">Size of Heart</label>
+                    <input class="full" type="text" id="size" name="size" placeholder="Example: 13 x 11 cm" required />
+                </div>
+            `
+                    : `
+                <div class="form-grid">
+                    <label class="full" for="bloodtype">Blood Type</label>
+                    <select class="full" id="bloodtype" name="bloodtype" required>
+                        <option value="">Select blood type</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="AB">AB</option>
+                        <option value="O">O</option>
+                    </select>
+
+                    <label class="full" for="size">Size of Liver</label>
+                    <input class="full" type="text" id="size" name="size" placeholder="Example: 15 x 10 cm" required />
+                </div>
+            `;
+
+        registerShell.innerHTML = `
+            <div class="organ-detail">
+                <article class="organ-detail-card">
+                    <h2>${organName} Registration</h2>
+                    <p>Fill in the details below to register this organ for matching.</p>
+                </article>
+
+                <article class="organ-detail-card">
+                    <form id="${organ.toLowerCase()}-registration-form">
+                        ${fieldsMarkup}
+                        <div class="full">
+                            <h3 style="margin: 0 0 0.45rem; color: #12312d;">What we’ll check</h3>
+                            <ul class="hint-list">
+                                ${hintsMarkup}
+                            </ul>
+                        </div>
+                        <button type="submit" id="${organ.toLowerCase()}Submit">Register ${organName}</button>
+                    </form>
+                </article>
+            </div>
+        `;
+
+        attachSubmit(`${organ.toLowerCase()}-registration-form`, organName);
+    };
+
     organSelect.addEventListener('change', () => {
-        const organ = document.getElementById('organ').value;
-        if (organ === '') {
+        const organ = organSelect.value;
+        if (!organ) {
             alert('Please select an organ to register.');
             return;
         }
 
-        // helper to attach the submit handler
-        const attachSubmit = (formId, organType) => {
-            setTimeout(() => {
-                const form = document.getElementById(formId);
-                if (!form) return;
-
-                form.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const username = sessionStorage.getItem('username');
-                    const bloodtype = document.getElementById('bloodtype').value;
-                    const size = document.getElementById('size').value;
-
-                    const ptlc = document.getElementById('ptlc')?.value || null;
-                    const hla = document.getElementById('hla')?.value || null;
-
-                    try {
-                        const response = await fetch('/api/registerOrgan', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                username,
-                                organ: organType.toLowerCase(),
-                                bloodtype,
-                                size,
-                                ptlc,
-                                hla
-                            })
-                        });
-                        const data = await response.json().catch(() => ({}));
-                        if (response.ok) {
-                            alert(data.message || `${organType} registered successfully!`);
-                            form.reset();
-                        } else {
-                            alert(data.error || `Failed to register ${organType}. Please try again.`);
-                        }
-                    } catch (error) {
-                        console.error(`Error registering ${organType}:`, error);
-                        alert(`An error occurred while registering the ${organType}. Please try again.`);
-                    }
-                });
-            }, 100); // slight delay to ensure form is rendered
-        };
-
-        if (organ.toLowerCase() === 'lung') {
-            const lungFormHtml = `
-                    <h2>Lung Registration</h2>
-                    <form id="lung-registration-form">
-                        <label for="bloodtype">Blood Type:</label>
-                        <select id="bloodtype" name="bloodtype" required>
-                            <option value="">Select blood type</option>
-                            <option value="A">A</option>
-                            <option value="B">B</option>
-                            <option value="AB">AB</option>
-                            <option value="O">O</option>
-                        </select>
-                        <label for="size">Size of Lung (in cm) (widthxheight):</label>
-                        <input type="text" id="size" name="size" required>
-                        <label for="ptlc">Predicted Total Lung Capacity (pTLC) (in liters):</label>
-                        <input type="number" id="ptlc" name="ptlc" required>
-                        <button type="submit" id="lungSubmit">Register Lung</button>
-                    </form>
-                `;
-            document.querySelector('.container').innerHTML = lungFormHtml;
-            attachSubmit('lung-registration-form', 'Lung');
-
-        } else if (organ.toLowerCase() === 'kidney') {
-            const kidneyFormHtml = `
-                    <h2>Kidney Registration</h2>
-                    <form id="kidney-registration-form">
-                        <label for="bloodtype">Blood Type:</label>
-                        <select id="bloodtype" name="bloodtype" required>
-                            <option value="">Select blood type</option>
-                            <option value="A">A</option>
-                            <option value="B">B</option>
-                            <option value="AB">AB</option>
-                            <option value="O">O</option>
-                        </select>
-                        <label for="hla">HLA Typing:</label>
-                        <input type="text" id="hla" name="hla" required>
-                        <label for="size">Size of Kidney (in cm) (widthxheight):</label>
-                        <input type="number" id="size" name="size" required>
-                        <button type="submit" id="kidneySubmit">Register Kidney</button>
-                    </form>
-                `;
-            document.querySelector('.container').innerHTML = kidneyFormHtml;
-            attachSubmit('kidney-registration-form', 'Kidney');
-        } else if (organ.toLowerCase() === 'heart') {
-            const heartFormHtml = `
-                    <h2>Heart Registration</h2>
-                    <form id="heart-registration-form">
-                        <label for="bloodtype">Blood Type:</label>
-                        <select id="bloodtype" name="bloodtype" required>
-                            <option value="">Select blood type</option>
-                            <option value="A">A</option>
-                            <option value="B">B</option>
-                            <option value="AB">AB</option>
-                            <option value="O">O</option>
-                        </select>
-                        <label for="size">Size of Heart (in cm.) (widthxheight):</label>
-                        <input type="text" id="size" name="size" required>
-                        <button type="submit" id="heartSubmit">Register Heart</button>
-                    </form>
-                `;
-            document.querySelector('.container').innerHTML = heartFormHtml;
-            attachSubmit('heart-registration-form', 'Heart');
-        } else if (organ.toLowerCase() === 'liver') {
-            const liverFormHtml = `
-                    <h2>Liver Registration</h2>
-                    <form id="liver-registration-form"> 
-                        <label for="bloodtype">Blood Type:</label>
-                        <select id="bloodtype" name="bloodtype" required>
-                            <option value="">Select blood type</option>
-                            <option value="A">A</option>
-                            <option value="B">B</option>
-                            <option value="AB">AB</option>
-                            <option value="O">O</option>
-                        </select>
-                        <label for="size">Size of Liver (in cm) (widthxheight):</label>
-                        <input type="text" id="size" name="size" required>
-                        <button type="submit" id="liverSubmit">Register Liver</button>
-                    </form>
-                `;
-            document.querySelector('.container').innerHTML = liverFormHtml;
-            attachSubmit('liver-registration-form', 'Liver');
-        }
+        renderOrganForm(organ);
     });
 }
 

@@ -1,27 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Register Organs</title>
-        <link rel="stylesheet" href="/css/styles.css" />
-    </head>
-    <body>
-        <h1>Register Organs</h1>
-        <div class="container">
-            <form id="register-organ-form" onsubmit="return false;">
-                <label for="organ">Organ to Register:</label>
-                <select id="organ" name="organ" required>
-                    <option value="">Select an organ</option>
-                    <option value="kidney">Kidney</option>
-                    <option value="liver">Liver</option>
-                    <option value="lung">Lung</option>
-                    <option value="heart">Heart</option>
-                </select>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register Organs</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+    <link rel="stylesheet" href="/css/registerorgans.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <h1>FindMyDonor</h1>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/createaccount">Create Account</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/contact">Contact</a>
+      </nav>
+    </header>
 
-                <button type="submit">Register Organ</button>
-            </form>
+    <main class="register-page">
+      <section class="register-hero">
+        <div class="hero-copy">
+          <span class="eyebrow">Organ registration</span>
+          <h2>Register an organ</h2>
+          <p>Select an organ to begin registration</p>
         </div>
+        <div class="hero-stats" aria-label="Registration tips">
+          <article>
+            <strong>Select organ</strong>
+            <span>Choose an organ</span>
+          </article>
+          <article>
+            <strong>Register details</strong>
+            <span>Your details are saved</span>
+          </article>
+        </div>
+      </section>
+
+      <section class="register-shell">
+        <div class="register-card" id="register-shell">
+          <div class="register-intro" id="register-intro">
+            <h3>Start by selecting an organ</h3>
+            <p>Each organ has its own registration form</p>
+          </div>
+
+          <form id="register-organ-form" class="organ-picker" onsubmit="return false;">
+            <label for="organ">Organ to Register</label>
+            <select id="organ" name="organ" required>
+              <option value="">Select an organ</option>
+              <option value="kidney">Kidney</option>
+              <option value="liver">Liver</option>
+              <option value="lung">Lung</option>
+              <option value="heart">Heart</option>
+            </select>
+
+            <button type="submit">Open Registration Form</button>
+          </form>
+
+          <div class="register-note">
+            <span>Tip</span>
+            <p>Select an organ above to continue</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
     <script src="/js/main.js"></script>
-    </body>
+  </body>
 </html>

@@ -26,7 +26,7 @@
   margin-top: 0;
 }
 
-#createAccountForm {
+#createHealthReviewForm {
   margin-top: 1rem;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -34,13 +34,13 @@
   row-gap: 0.65rem;
 }
 
-#createAccountForm label {
+#createHealthReviewForm label {
   font-size: 0.92rem;
   color: #334155;
   font-weight: 600;
 }
 
-#createAccountForm input {
+#createHealthReviewForm input {
   width: 100%;
   padding: 0.7rem 0.8rem;
   border-radius: 10px;
@@ -50,13 +50,13 @@
   margin-bottom: 0.3rem;
 }
 
-#createAccountForm input:focus {
+#createHealthReviewForm input:focus {
   outline: none;
   border-color: #0f766e;
   box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.16);
 }
 
-#createAccountForm button {
+#createHealthReviewForm button {
   grid-column: 1 / -1;
   margin-top: 0.45rem;
   border: 0;
@@ -70,9 +70,79 @@
   transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
-#createAccountForm button:hover {
+#createHealthReviewForm button:hover {
   background: #0c5f58;
   transform: translateY(-1px);
+}
+
+#createHealthReviewForm button:disabled {
+  cursor: wait;
+  opacity: 0.75;
+  transform: none;
+}
+
+.processing-status {
+  grid-column: 1 / -1;
+  margin-top: 0.35rem;
+  padding: 1rem;
+  border-radius: 14px;
+  border: 1px solid #bfe6dc;
+  background: linear-gradient(135deg, #effaf7 0%, #ffffff 85%);
+}
+
+.processing-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: #0f766e;
+}
+
+.processing-heading strong {
+  font-size: 0.98rem;
+}
+
+.processing-dot {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 999px;
+  background: #0f766e;
+  animation: pulseDot 1.15s infinite;
+}
+
+.processing-status p {
+  margin: 0.65rem 0 0.85rem;
+  color: #475569;
+}
+
+.processing-track {
+  height: 10px;
+  border-radius: 999px;
+  background: #d9f2ec;
+  overflow: hidden;
+}
+
+.processing-fill {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #0f766e, #2dd4bf);
+}
+
+.is-processing .processing-fill {
+  animation: fillProgress 2s ease-in-out forwards;
+}
+
+.process-complete {
+  margin-top: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.75rem;
+  border-radius: 999px;
+  background: #0f766e;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .create-card small {
@@ -87,8 +157,32 @@
 }
 
 @media (max-width: 700px) {
-  #createAccountForm {
+  #createHealthReviewForm {
     grid-template-columns: 1fr;
+  }
+}
+
+@keyframes fillProgress {
+  0% {
+    width: 0;
+  }
+  70% {
+    width: 82%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+@keyframes pulseDot {
+  0%,
+  100% {
+    transform: scale(0.92);
+    box-shadow: 0 0 0 0 rgba(15, 118, 110, 0.45);
+  }
+  50% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(15, 118, 110, 0);
   }
 }
 
