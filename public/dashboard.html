@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -190,6 +191,25 @@
       width: fit-content;
     }
 
+    .request-notice {
+      margin-top: 0.65rem;
+      padding: 0.7rem 0.8rem;
+      border-radius: 12px;
+      background: #fff7e6;
+      border: 1px solid #f2d18a;
+      color: #6f4a0d;
+      line-height: 1.4;
+    }
+
+    .request-list {
+      margin: 0.45rem 0 0;
+      padding-left: 1.2rem;
+    }
+
+    .request-list li {
+      margin: 0.2rem 0;
+    }
+
     .loading,
     .error {
       padding: 1rem 1.1rem;
@@ -205,6 +225,7 @@
     }
   </style>
 </head>
+
 <body>
   <header class="site-header">
     <h1>Organ Transplant App</h1>
@@ -263,6 +284,24 @@
           const user = data.user || {};
           const organs = data.organs || {};
 
+          const renderRequests = (item) => {
+            const requesters = Array.isArray(item.requesters) ? item.requesters : [];
+            if (requesters.length === 0) return '';
+
+            return `
+              <div class="request-notice">
+                <strong>Transplant requests</strong>
+                <ul class="request-list">
+                  ${requesters.map((requester) => `
+                    <li>User ID ${requester.id} (${requester.email ?? 'email unavailable'}) wants to transplant their organ. <a href="https://mail.google.com/mail/?view=cm&fs=1&to=${requester.email}&su=Organ%20Transplant%20Request" target="_blank">
+  Email them here
+</a></li>
+                  `).join('')}
+                </ul>
+              </div>
+            `;
+          };
+
           const renderOrganCard = (label, items, formatter) => {
             if (!Array.isArray(items) || items.length === 0) {
               return `
@@ -316,6 +355,7 @@
                       <span><strong>HLA:</strong> ${item.hla ?? ''}</span>
                       <span><strong>Size:</strong> ${item.size ?? ''}</span>
                     </div>
+                    ${renderRequests(item)}
                   </div>
                 `)}
 
@@ -326,6 +366,7 @@
                     <div class="organ-metadata">
                       <span><strong>Size:</strong> ${item.size ?? ''}</span>
                     </div>
+                    ${renderRequests(item)}
                   </div>
                 `)}
 
@@ -337,6 +378,7 @@
                       <span><strong>Size:</strong> ${item.size ?? ''}</span>
                       <span><strong>pTLC:</strong> ${item.ptlc ?? ''}</span>
                     </div>
+                    ${renderRequests(item)}
                   </div>
                 `)}
 
@@ -347,6 +389,7 @@
                     <div class="organ-metadata">
                       <span><strong>Size:</strong> ${item.size ?? ''}</span>
                     </div>
+                    ${renderRequests(item)}
                   </div>
                 `)}
               </div>
@@ -368,4 +411,5 @@
     }
   </script>
 </body>
+
 </html>

@@ -1,7 +1,7 @@
 const yearEl = document.getElementById('year');
 
 if (yearEl) {
-  yearEl.textContent = new Date().getFullYear();
+    yearEl.textContent = new Date().getFullYear();
 }
 
 const authLink = document.getElementById('auth-link');
@@ -9,13 +9,13 @@ const welcomeUser = document.getElementById('welcome-user');
 const username = sessionStorage.getItem('username');
 
 if (username && authLink && welcomeUser) {
-        authLink.hidden = true;
-        welcomeUser.hidden = false;
-        welcomeUser.textContent = `Welcome, ${username}`;
+    authLink.hidden = true;
+    welcomeUser.hidden = false;
+    welcomeUser.textContent = `Welcome, ${username}`;
 }
 
 if (document.getElementById('createAccountForm')) {
-  const createAccountForm = document.getElementById('createAccountForm');
+    const createAccountForm = document.getElementById('createAccountForm');
     createAccountForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const username = document.getElementById('username').value;
@@ -29,6 +29,8 @@ if (document.getElementById('createAccountForm')) {
         const height = document.getElementById('height').value;
         const gender = document.getElementById('gender').value;
         const bloodType = document.getElementById('blood_type').value;
+        const city = document.getElementById('city')?.value || '';
+        const state = document.getElementById('state')?.value || '';
 
         try {
             const response = await fetch('/api/createaccount', {
@@ -36,12 +38,19 @@ if (document.getElementById('createAccountForm')) {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ username, password, first_name, last_name, phone_number, country, age, height, gender, bloodType, email })
+                body: JSON.stringify({ username, password, first_name, last_name, phone_number, country, age, height, gender, bloodType, email, city, state })
             });
             const responseBody = await response.json().catch(() => ({}));
 
             if (response.ok) {
                 sessionStorage.setItem('username', username);
+                sessionStorage.setItem('first_name', first_name);
+                sessionStorage.setItem('id', responseBody.id);
+                sessionStorage.setItem('email', email);
+                sessionStorage.setItem('phone_number', phone_number);
+                sessionStorage.setItem('country', country);
+                sessionStorage.setItem('age', age);
+                sessionStorage.setItem('height', height);
                 console.log('✓ Username stored in sessionStorage:', sessionStorage.getItem('username'));
                 alert(responseBody.message || 'Account created successfully!');
                 createAccountForm.reset();
@@ -65,12 +74,22 @@ if (document.getElementById('login-account-form')) {
         const response = await fetch('/api/login-to-account', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'            },
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify({ username, password })
         });
         const responseBody = await response.json().catch(() => ({}));
         if (response.ok) {
             sessionStorage.setItem('username', username);
+            if (responseBody.user?.id !== undefined && responseBody.user?.id !== null) {
+                sessionStorage.setItem('id', String(responseBody.user.id));
+            }
+            if (responseBody.user?.first_name) sessionStorage.setItem('first_name', responseBody.user.first_name);
+            if (responseBody.user?.email) sessionStorage.setItem('email', responseBody.user.email);
+            if (responseBody.user?.phone_number) sessionStorage.setItem('phone_number', responseBody.user.phone_number);
+            if (responseBody.user?.country) sessionStorage.setItem('country', responseBody.user.country);
+            if (responseBody.user?.age !== undefined && responseBody.user?.age !== null) sessionStorage.setItem('age', String(responseBody.user.age));
+            if (responseBody.user?.height !== undefined && responseBody.user?.height !== null) sessionStorage.setItem('height', String(responseBody.user.height));
             console.log('✓ Username stored in sessionStorage:', sessionStorage.getItem('username'));
             alert(responseBody.message || 'Logged in successfully!');
             window.location.href = '/dashboard';
@@ -104,13 +123,13 @@ if (document.getElementById('register-organ-form')) {
             setTimeout(() => {
                 const form = document.getElementById(formId);
                 if (!form) return;
-                
+
                 form.addEventListener('submit', async (e) => {
                     e.preventDefault();
                     const username = sessionStorage.getItem('username');
                     const bloodtype = document.getElementById('bloodtype').value;
                     const size = document.getElementById('size').value;
-                    
+
                     const ptlc = document.getElementById('ptlc')?.value || null;
                     const hla = document.getElementById('hla')?.value || null;
 
@@ -143,7 +162,7 @@ if (document.getElementById('register-organ-form')) {
         };
 
         if (organ.toLowerCase() === 'lung') {
-                const lungFormHtml = `
+            const lungFormHtml = `
                     <h2>Lung Registration</h2>
                     <form id="lung-registration-form">
                         <label for="bloodtype">Blood Type:</label>
@@ -161,11 +180,11 @@ if (document.getElementById('register-organ-form')) {
                         <button type="submit" id="lungSubmit">Register Lung</button>
                     </form>
                 `;
-                document.querySelector('.container').innerHTML = lungFormHtml;
-                attachSubmit('lung-registration-form', 'Lung');
-                
-            } else if (organ.toLowerCase() === 'kidney') {
-                const kidneyFormHtml = `
+            document.querySelector('.container').innerHTML = lungFormHtml;
+            attachSubmit('lung-registration-form', 'Lung');
+
+        } else if (organ.toLowerCase() === 'kidney') {
+            const kidneyFormHtml = `
                     <h2>Kidney Registration</h2>
                     <form id="kidney-registration-form">
                         <label for="bloodtype">Blood Type:</label>
@@ -183,10 +202,10 @@ if (document.getElementById('register-organ-form')) {
                         <button type="submit" id="kidneySubmit">Register Kidney</button>
                     </form>
                 `;
-                document.querySelector('.container').innerHTML = kidneyFormHtml;
-                attachSubmit('kidney-registration-form', 'Kidney');
-            } else if (organ.toLowerCase() === 'heart') {
-                const heartFormHtml = `
+            document.querySelector('.container').innerHTML = kidneyFormHtml;
+            attachSubmit('kidney-registration-form', 'Kidney');
+        } else if (organ.toLowerCase() === 'heart') {
+            const heartFormHtml = `
                     <h2>Heart Registration</h2>
                     <form id="heart-registration-form">
                         <label for="bloodtype">Blood Type:</label>
@@ -202,10 +221,10 @@ if (document.getElementById('register-organ-form')) {
                         <button type="submit" id="heartSubmit">Register Heart</button>
                     </form>
                 `;
-                document.querySelector('.container').innerHTML = heartFormHtml;
-                attachSubmit('heart-registration-form', 'Heart');
-            } else if (organ.toLowerCase() === 'liver') {
-                const liverFormHtml = `
+            document.querySelector('.container').innerHTML = heartFormHtml;
+            attachSubmit('heart-registration-form', 'Heart');
+        } else if (organ.toLowerCase() === 'liver') {
+            const liverFormHtml = `
                     <h2>Liver Registration</h2>
                     <form id="liver-registration-form"> 
                         <label for="bloodtype">Blood Type:</label>
@@ -221,9 +240,9 @@ if (document.getElementById('register-organ-form')) {
                         <button type="submit" id="liverSubmit">Register Liver</button>
                     </form>
                 `;
-                document.querySelector('.container').innerHTML = liverFormHtml;
-                attachSubmit('liver-registration-form', 'Liver');
-            }
+            document.querySelector('.container').innerHTML = liverFormHtml;
+            attachSubmit('liver-registration-form', 'Liver');
+        }
     });
 }
 
@@ -323,7 +342,13 @@ const attachSubmitFindMatch = (formId, organType) => {
                             <h3>${organType} Matches</h3>
                             <div class="matches-grid">
                                 ${matches.map((match) => `
-                                    <article class="match-tile">
+                                    <article
+                                        class="match-tile"
+                                        data-email="${match.email ?? ''}"
+                                        data-organ="${organType.toLowerCase()}"
+                                        data-organ-id="${match.id ?? ''}"
+                                        style="cursor: pointer;"
+                                    >
                                         <h3 class="match-name">${match.first_name ?? ''} ${match.last_name ?? ''}</h3>
                                         <div class="match-body">
                                             <section class="match-section">
@@ -345,6 +370,40 @@ const attachSubmitFindMatch = (formId, organType) => {
                                 `).join('')}
                             </div>
                         `;
+                        // Attach click listeners to tiles after they're created
+                        setTimeout(() => {
+                            document.querySelectorAll('.match-tile').forEach(tile => {
+                                tile.addEventListener('click', async () => {
+                                    const email = tile.dataset.email;
+                                    const organ = tile.dataset.organ;
+                                    const organRecordId = tile.dataset.organId || null;
+                                    const username = sessionStorage.getItem('username');
+                                    if (!username) {
+                                        alert('You must be logged in to contact a match. Redirecting to login page.');
+                                        window.location.href = '/login_to_account';
+                                        return;
+                                    }
+                                    if (!email || !organ) {
+                                        alert('Unable to identify this match. Please refresh and try again.');
+                                        return;
+                                    }
+                                    console.log(sessionStorage.getItem('id'), username, email, organ, organRecordId);
+                                    // send a POST request to the server to trigger an email to the match
+                                    const response = await fetch('/api/contactmatch', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ username, email, id: sessionStorage.getItem('id'), organ, organRecordId })
+                                    });
+                                    const data = await response.json().catch(() => ({}));
+                                    if (response.ok) {
+                                        alert(data.message);
+                                    } else {
+                                        alert(data.error || 'Failed to contact match. Please try again.');
+                                    }
+                                });
+                            });
+                        }, 50);
+
                     }
                 }
 
@@ -359,7 +418,7 @@ const attachSubmitFindMatch = (formId, organType) => {
     });
 };
 
-if (document.getElementById('match-with-donor-form')){
+if (document.getElementById('match-with-donor-form')) {
     const organSelect = document.getElementById('match-organ');
     const matchFormContainer = document.querySelector('.match-panel .panel-body') || document.querySelector('.container');
 

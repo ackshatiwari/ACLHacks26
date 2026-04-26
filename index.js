@@ -3,6 +3,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { neon } from '@neondatabase/serverless';
+import nodemailer from 'nodemailer';
+
 
 dotenv.config();
 const app = express();
@@ -11,6 +13,7 @@ const __dirname = path.dirname(__filename);
 const publicDir = path.join(__dirname, 'public');
 const DATABASE_URL = process.env.DATABASE_URL;
 const sql = DATABASE_URL ? neon(DATABASE_URL) : null;
+
 
 const PORT = process.env.PORT || 3000;
 
@@ -62,9 +65,9 @@ app.get('/match_with_doner', (req, res) => {
 
 
 app.post('/api/createaccount', async (req, res) => {
-    const { username, password, first_name, last_name, phone_number, country, age, height, gender, bloodtype, bloodType, email } = req.body;
+    const { username, password, first_name, last_name, phone_number, country, age, height, gender, bloodtype, bloodType, email, city, state } = req.body;
     const resolvedBloodType = bloodtype ?? bloodType;
-    const requiredFields = [username, password, first_name, last_name, phone_number, country, age, height, gender, resolvedBloodType, email];
+    const requiredFields = [username, password, first_name, last_name, phone_number, country, age, height, gender, resolvedBloodType, email, city, state];
 
     // Validate that all required fields are present and not just whitespace
     if (requiredFields.some((value) => !String(value || '').trim())) {
@@ -89,13 +92,15 @@ app.post('/api/createaccount', async (req, res) => {
         height: parseInt(height),
         gender: gender.trim(),
         bloodtype: String(resolvedBloodType).trim(),
-        email: email.trim()
+        email: email.trim(),
+        city: city.trim(),
+        state: state.trim()
     };
 
     try {
 
         await sql`
-			INSERT INTO users (first_name, last_name, phone_number, country, password, username, age, height, gender, blood_type, email)
+			INSERT INTO users (first_name, last_name, phone_number, country, password, username, age, height, gender, blood_type, email, city, state)
 			VALUES (
 				${normalized.first_name},
                 ${normalized.last_name},
@@ -107,11 +112,19 @@ app.post('/api/createaccount', async (req, res) => {
 				${normalized.height},
 				${normalized.gender},
                 ${normalized.bloodtype},
-                ${normalized.email}
+                ${normalized.email},
+                ${normalized.city},
+                ${normalized.state}
 			)
 		`;
 
-        res.status(201).json({ message: 'Account created successfully' });
+        // get the id of the user that was just created and return it in the response along with the username and first name
+        const createdUser = await sql`
+            SELECT id FROM users WHERE username = ${normalized.username}
+        `;
+
+
+        res.status(201).json({ message: 'Account created successfully', id: createdUser[0].id });
     } catch (error) {
         if (error && error.code === '23505') {
             return res.status(409).json({ error: 'Username already exists.' });
@@ -133,12 +146,14 @@ app.post('/api/login-to-account', async (req, res) => {
 
     try {
         const user = await sql`
-            SELECT * FROM users WHERE username = ${String(username).trim()} AND password = ${String(password).trim()}
+            SELECT id, username, first_name, email, phone_number, country, age, height
+            FROM users
+            WHERE username = ${String(username).trim()} AND password = ${String(password).trim()}
         `;
         if (user.length === 0) {
             return res.status(401).json({ error: 'Invalid username or password.' });
         }
-        res.status(200).json({ message: 'Login successful!' });
+        res.status(200).json({ message: 'Login successful!', user: user[0] });
     } catch (error) {
         console.error('Database error during login:', error);
         res.status(500).json({ error: 'Failed to log in.' });
@@ -157,7 +172,7 @@ app.get('/api/dashboard', async (req, res) => {
 
     try {
         const users = await sql`
-            SELECT id, first_name, last_name, email, phone_number, country, age, height, gender, blood_type, username
+            SELECT id, first_name, last_name, email, phone_number, country, age, height, gender, blood_type, username, city, state
             FROM public.users
             WHERE username = ${username}
         `;
@@ -169,36 +184,82 @@ app.get('/api/dashboard', async (req, res) => {
         const user = users[0];
 
         const kidneys = await sql`
-            SELECT blood_type, hla, size
+            SELECT id, blood_type, hla, size, requested_users
             FROM public.kidneys
             WHERE user_id = ${user.id}
         `;
 
         const livers = await sql`
-            SELECT blood_type, size
+            SELECT id, blood_type, size, requested_users
             FROM public.livers
             WHERE user_id = ${user.id}
         `;
 
         const lungs = await sql`
-            SELECT blood_type, size, ptlc
+            SELECT id, blood_type, size, ptlc, requested_users
             FROM public.lungs
             WHERE user_id = ${user.id}
         `;
 
         const hearts = await sql`
-            SELECT blood_type, size
+            SELECT id, blood_type, size, requested_users
             FROM public.hearts
             WHERE user_id = ${user.id}
         `;
 
+        const enrichOrgansWithRequesterEmails = async (organRows) => {
+            if (!Array.isArray(organRows) || organRows.length === 0) {
+                return [];
+            }
+
+            const requesterIds = [...new Set(
+                organRows
+                    .flatMap((row) => (Array.isArray(row.requested_users) ? row.requested_users : []))
+                    .map((value) => Number.parseInt(String(value), 10))
+                    .filter((value) => Number.isInteger(value))
+            )];
+
+            const emailById = new Map();
+
+            for (const requesterId of requesterIds) {
+                const requesterRows = await sql`
+                    SELECT id, email
+                    FROM public.users
+                    WHERE id = ${requesterId}
+                `;
+                if (requesterRows.length > 0) {
+                    emailById.set(requesterRows[0].id, requesterRows[0].email);
+                }
+            }
+
+            return organRows.map((row) => {
+                const requesters = (Array.isArray(row.requested_users) ? row.requested_users : [])
+                    .map((value) => Number.parseInt(String(value), 10))
+                    .filter((value) => Number.isInteger(value))
+                    .map((requesterId) => ({
+                        id: requesterId,
+                        email: emailById.get(requesterId) || null
+                    }));
+
+                return {
+                    ...row,
+                    requesters
+                };
+            });
+        };
+
+        const kidneysWithRequesters = await enrichOrgansWithRequesterEmails(kidneys);
+        const liversWithRequesters = await enrichOrgansWithRequesterEmails(livers);
+        const lungsWithRequesters = await enrichOrgansWithRequesterEmails(lungs);
+        const heartsWithRequesters = await enrichOrgansWithRequesterEmails(hearts);
+
         res.status(200).json({
             user,
             organs: {
-                kidneys,
-                livers,
-                lungs,
-                hearts
+                kidneys: kidneysWithRequesters,
+                livers: liversWithRequesters,
+                lungs: lungsWithRequesters,
+                hearts: heartsWithRequesters
             }
         });
     } catch (error) {
@@ -298,7 +359,7 @@ const registerOrganHandler = async (req, res) => {
 };
 
 const findMatchesHandler = async (req, res) => {
-    const { organ, bloodtype, size, ptlc, hla } = req.body;
+    const { organ, bloodtype, size, ptlc, hla, city, state, country } = req.body;
     // hla and ptlc are optional and only used for kidney matches. If the organ is not a kidney, then they will be undefined and should not be included in the query to find matches.
     if (organ === undefined || bloodtype === undefined) {
         return res.status(400).json({ error: 'Organ and blood type are required.' });
@@ -309,7 +370,7 @@ const findMatchesHandler = async (req, res) => {
     // look through the databse of the organ in the 'organ field' and select everything
     if (organ.trim() === 'liver') {
         try {
-            const matchOrgans = await sql`
+            let matchOrgans = await sql`
                 SELECT
                     l.*,
                     u.first_name,
@@ -317,10 +378,35 @@ const findMatchesHandler = async (req, res) => {
                     u.email,
                     u.phone_number,
                     u.country,
-                    u.age
+                    u.age,
+                    u.city,
+                    u.state
                 FROM public.livers AS l
                 JOIN public.users AS u ON u.id = l.user_id
                 WHERE l.blood_type = ${bloodtype.trim()} `;
+            if (city || state || country) {
+                const cty = String(city || '').trim();
+                const st = String(state || '').trim();
+                const cn = String(country || '').trim();
+                matchOrgans = await sql`
+                    SELECT
+                        l.*,
+                        u.first_name,
+                        u.last_name,
+                        u.email,
+                        u.phone_number,
+                        u.country,
+                        u.age,
+                        u.city,
+                        u.state
+                    FROM public.livers AS l
+                    JOIN public.users AS u ON u.id = l.user_id
+                    WHERE l.blood_type = ${bloodtype.trim()}
+                      AND u.city = ${cty}
+                      AND u.state = ${st}
+                      AND u.country = ${cn}
+                `;
+            }
             res.status(200).json({ matches: matchOrgans });
         } catch (error) {
             console.error('Database error during match finding:', error);
@@ -331,7 +417,7 @@ const findMatchesHandler = async (req, res) => {
             return res.status(400).json({ error: 'HLA is required for kidney match finding.' });
         }
         try {
-            const matchOrgans = await sql`
+            let matchOrgans = await sql`
                 SELECT
                     k.*,
                     u.first_name,
@@ -339,11 +425,37 @@ const findMatchesHandler = async (req, res) => {
                     u.email,
                     u.phone_number,
                     u.country,
-                    u.age
+                    u.age,
+                    u.city,
+                    u.state
                 FROM public.kidneys AS k
                 JOIN public.users AS u ON u.id = k.user_id
                 WHERE k.blood_type = ${bloodtype.trim()}
                   AND k.hla = ${String(hla).trim()} `;
+            if (city || state || country) {
+                const cty = String(city || '').trim();
+                const st = String(state || '').trim();
+                const cn = String(country || '').trim();
+                matchOrgans = await sql`
+                    SELECT
+                        k.*,
+                        u.first_name,
+                        u.last_name,
+                        u.email,
+                        u.phone_number,
+                        u.country,
+                        u.age,
+                        u.city,
+                        u.state
+                    FROM public.kidneys AS k
+                    JOIN public.users AS u ON u.id = k.user_id
+                    WHERE k.blood_type = ${bloodtype.trim()}
+                      AND k.hla = ${String(hla).trim()}
+                      AND u.city = ${cty}
+                      AND u.state = ${st}
+                      AND u.country = ${cn}
+                `;
+            }
             res.status(200).json({ matches: matchOrgans });
         } catch (error) {
             console.error('Database error during match finding:', error);
@@ -351,7 +463,7 @@ const findMatchesHandler = async (req, res) => {
         }
     } else if (organ.trim() === 'heart') {
         try {
-            const matchOrgans = await sql`
+            let matchOrgans = await sql`
                 SELECT
                     h.*,
                     u.first_name,
@@ -359,10 +471,35 @@ const findMatchesHandler = async (req, res) => {
                     u.email,
                     u.phone_number,
                     u.country,
-                    u.age
+                    u.age,
+                    u.city,
+                    u.state
                 FROM public.hearts AS h
                 JOIN public.users AS u ON u.id = h.user_id
                 WHERE h.blood_type = ${bloodtype.trim()} `;
+            if (city || state || country) {
+                const cty = String(city || '').trim();
+                const st = String(state || '').trim();
+                const cn = String(country || '').trim();
+                matchOrgans = await sql`
+                    SELECT
+                        h.*,
+                        u.first_name,
+                        u.last_name,
+                        u.email,
+                        u.phone_number,
+                        u.country,
+                        u.age,
+                        u.city,
+                        u.state
+                    FROM public.hearts AS h
+                    JOIN public.users AS u ON u.id = h.user_id
+                    WHERE h.blood_type = ${bloodtype.trim()}
+                      AND u.city = ${cty}
+                      AND u.state = ${st}
+                      AND u.country = ${cn}
+                `;
+            }
             res.status(200).json({ matches: matchOrgans });
         } catch (error) {
             console.error('Database error during match finding:', error);
@@ -373,7 +510,7 @@ const findMatchesHandler = async (req, res) => {
             return res.status(400).json({ error: 'pTLC is required for lung match finding.' });
         }
         try {
-            const matchOrgans = await sql`
+            let matchOrgans = await sql`
                 SELECT
                     l.*,
                     u.first_name,
@@ -381,11 +518,37 @@ const findMatchesHandler = async (req, res) => {
                     u.email,
                     u.phone_number,
                     u.country,
-                    u.age
+                    u.age,
+                    u.city,
+                    u.state
                 FROM public.lungs AS l
                 JOIN public.users AS u ON u.id = l.user_id
                 WHERE l.blood_type = ${bloodtype.trim()}
                   AND l.ptlc = ${String(ptlc).trim()} `;
+            if (city || state || country) {
+                const cty = String(city || '').trim();
+                const st = String(state || '').trim();
+                const cn = String(country || '').trim();
+                matchOrgans = await sql`
+                    SELECT
+                        l.*,
+                        u.first_name,
+                        u.last_name,
+                        u.email,
+                        u.phone_number,
+                        u.country,
+                        u.age,
+                        u.city,
+                        u.state
+                    FROM public.lungs AS l
+                    JOIN public.users AS u ON u.id = l.user_id
+                    WHERE l.blood_type = ${bloodtype.trim()}
+                      AND l.ptlc = ${String(ptlc).trim()}
+                      AND u.city = ${cty}
+                      AND u.state = ${st}
+                      AND u.country = ${cn}
+                `;
+            }
             res.status(200).json({ matches: matchOrgans });
         } catch (error) {
             console.error('Database error during match finding:', error);
@@ -397,9 +560,90 @@ const findMatchesHandler = async (req, res) => {
 
 }
 
+app.post('/api/contactmatch', async (req, res) => {
+    const { username, email, id, organ, organRecordId } = req.body;
+
+    console.log("Contact Match Request Received:", { username, email, id, organ, organRecordId });
+
+    // 1. Validation
+    if (!email || !username || !organ) {
+        return res.status(400).json({ error: 'Username, email, and organ are required.' });
+    }
+    if (!sql) {
+        return res.status(500).json({ error: 'Database is not configured' });
+    }
+
+    const organKey = String(organ).trim().toLowerCase();
+    if (!['kidney', 'liver', 'lung', 'heart'].includes(organKey)) {
+        return res.status(400).json({ error: 'Invalid organ type.' });
+    }
+
+    const requesterId = Number.parseInt(String(id), 10);
+    const targetOrganId = Number.parseInt(String(organRecordId), 10);
+    if (!Number.isInteger(requesterId) || !Number.isInteger(targetOrganId)) {
+        return res.status(400).json({ error: 'Valid requester and target organ ids are required.' });
+    }
+
+    try {
+        let transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: 'cooloofy123@gmail.com',
+                pass: process.env.GMAIL_APP_PASSWORD,
+            },
+            tls: { rejectUnauthorized: false }
+        });
+
+        let info = await transporter.sendMail({
+            from: '"Find My Donor" <cooloofy123@gmail.com>',
+            to: email.trim(),
+            subject: `${organKey.toUpperCase()} Match Request from ${username}`,
+            html: `<p>Hey</p><p>You have received a new match request...</p>`
+        });
+
+        if (organKey === 'kidney') {
+            await sql`
+                UPDATE public.kidneys
+                SET requested_users = array_append(COALESCE(requested_users, '{}'::int[]), ${requesterId})
+                WHERE id = ${targetOrganId}
+            `;
+        } else if (organKey === 'liver') {
+            await sql`
+                UPDATE public.livers
+                SET requested_users = array_append(COALESCE(requested_users, '{}'::int[]), ${requesterId})
+                WHERE id = ${targetOrganId}
+            `;
+        } else if (organKey === 'lung') {
+            await sql`
+                UPDATE public.lungs
+                SET requested_users = array_append(COALESCE(requested_users, '{}'::int[]), ${requesterId})
+                WHERE id = ${targetOrganId}
+            `;
+        } else {
+            await sql`
+                UPDATE public.hearts
+                SET requested_users = array_append(COALESCE(requested_users, '{}'::int[]), ${requesterId})
+                WHERE id = ${targetOrganId}
+            `;
+        }
+
+        return res.status(200).json({ 
+            message: 'Contact email sent successfully!', 
+            organ: organKey 
+        });
+
+    } catch (error) {
+        console.error("Error in contactmatch:", error);
+        if (!res.headersSent) {
+            return res.status(500).json({ error: 'Failed to process match request.' });
+        }
+    }
+});
+
 app.post('/api/findmatches', findMatchesHandler);
 
 app.post(['/api/registerOrgan', '/api/register-organ', '/api/registerorgan'], registerOrganHandler);
+
 
 app.use((req, res) => {
     res.status(404).sendFile(path.join(publicDir, '404.html'));
